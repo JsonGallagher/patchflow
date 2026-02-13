@@ -7,6 +7,35 @@
 namespace pf
 {
 
+namespace
+{
+juce::String findPreferredBlackHoleInput (juce::AudioDeviceManager& deviceManager)
+{
+    const auto& types = deviceManager.getAvailableDeviceTypes();
+
+    juce::String fallbackMatch;
+    for (auto* type : types)
+    {
+        if (type == nullptr)
+            continue;
+
+        type->scanForDevices();
+        const auto inputNames = type->getDeviceNames (true);
+
+        for (const auto& inputName : inputNames)
+        {
+            if (inputName.equalsIgnoreCase ("BlackHole 2ch"))
+                return inputName;
+
+            if (fallbackMatch.isEmpty() && inputName.containsIgnoreCase ("BlackHole"))
+                fallbackMatch = inputName;
+        }
+    }
+
+    return fallbackMatch;
+}
+} // namespace
+
 AudioEngine::AudioEngine()
 {
 }
@@ -21,6 +50,26 @@ void AudioEngine::initialise()
     auto result = deviceManager_.initialiseWithDefaultDevices (2, 0); // 2 inputs, 0 outputs
     if (result.isNotEmpty())
         DBG ("AudioEngine init error: " + result);
+
+    const auto preferredInput = findPreferredBlackHoleInput (deviceManager_);
+    if (preferredInput.isNotEmpty())
+    {
+        auto setup = deviceManager_.getAudioDeviceSetup();
+        if (setup.inputDeviceName != preferredInput)
+        {
+            setup.inputDeviceName = preferredInput;
+
+            // Ensure the input is actually enabled when switching devices.
+            if (setup.inputChannels.countNumberOfSetBits() == 0)
+                setup.inputChannels.setRange (0, 2, true);
+
+            auto setResult = deviceManager_.setAudioDeviceSetup (setup, true);
+            if (setResult.isNotEmpty())
+                DBG ("AudioEngine BlackHole input setup error: " + setResult);
+            else
+                DBG ("AudioEngine: default input set to " + preferredInput);
+        }
+    }
 
     deviceManager_.addAudioCallback (this);
 }

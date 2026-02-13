@@ -40,6 +40,8 @@ private:
     void ensureFBO (juce::OpenGLContext& gl, int width, int height);
 
     std::vector<float> magnitudeSnapshot_;
+    std::vector<float> smoothedBars_;
+    std::vector<float> peakBars_;
     juce::uint32 fbo_ = 0;
     juce::uint32 fboTexture_ = 0;
     int fboWidth_ = 0, fboHeight_ = 0;

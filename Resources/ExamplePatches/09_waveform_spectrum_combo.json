@@ -58,10 +58,41 @@
     }
   ],
   "connections": [
-    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
-    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
-    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
-    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
-    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_6", "destPort": 0 }
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 0,
+      "destNode": "node_2",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 0,
+      "destNode": "node_3",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_3",
+      "sourcePort": 0,
+      "destNode": "node_4",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_4",
+      "sourcePort": 0,
+      "destNode": "node_5",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_5",
+      "sourcePort": 0,
+      "destNode": "node_6",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_2",
+      "sourcePort": 0,
+      "destNode": "node_5",
+      "destPort": 4
+    }
   ]
 }

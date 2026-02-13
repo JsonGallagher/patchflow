@@ -4,6 +4,7 @@
 #include "Graph/RuntimeGraph.h"
 #include "Audio/AnalysisSnapshot.h"
 #include "Nodes/Visual/OutputCanvasNode.h"
+#include <atomic>
 
 namespace pf
 {
@@ -33,14 +34,15 @@ public:
     void paint (juce::Graphics& g) override;
 
     //==============================================================================
-    void setRuntimeGraph (RuntimeGraph* graph) { runtimeGraph_ = graph; }
+    void setRuntimeGraph (RuntimeGraph* graph) { runtimeGraph_.store (graph, std::memory_order_release); }
     void setAnalysisFIFO (AnalysisFIFO* fifo) { analysisFifo_ = fifo; }
 
 private:
     juce::OpenGLContext glContext_;
-    RuntimeGraph* runtimeGraph_ = nullptr;
+    std::atomic<RuntimeGraph*> runtimeGraph_ { nullptr };
     AnalysisFIFO* analysisFifo_ = nullptr;
     AnalysisSnapshot snapshot_;
+    mutable juce::SpinLock snapshotLock_;
 
     // Blit shader for final output
     juce::uint32 blitProgram_ = 0;
@@ -55,9 +57,9 @@ private:
     void renderNoSignalPattern (int width, int height);
     void blitTextureToScreen (juce::uint32 texture);
 
-    float frameTime_ = 0.f;
-    int frameCount_ = 0;
-    int visualNodeCount_ = 0;
+    std::atomic<float> frameTime_ { 0.f };
+    std::atomic<int> frameCount_ { 0 };
+    std::atomic<int> visualNodeCount_ { 0 };
 };
 
 } // namespace pf

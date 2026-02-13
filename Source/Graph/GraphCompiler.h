@@ -4,6 +4,7 @@
 #include "Nodes/NodeRegistry.h"
 #include <atomic>
 #include <memory>
+#include <vector>
 
 namespace pf
 {
@@ -48,6 +49,7 @@ private:
     GraphModel& model_;
     std::atomic<RuntimeGraph*> pendingGraph_ { nullptr };
     RuntimeGraph* latestGraph_ = nullptr;
+    std::vector<std::unique_ptr<RuntimeGraph>> compiledGraphs_;
 
     double currentSampleRate_ = 44100.0;
     int currentBlockSize_ = 512;

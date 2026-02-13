@@ -46,6 +46,8 @@ private:
     void ensureFBO (juce::OpenGLContext& gl, int width, int height);
 
     std::vector<float> waveformSnapshot_;
+    std::vector<float> smoothedWaveform_;
+    float rmsLevel_ = 0.0f;
     juce::uint32 fbo_ = 0;
     juce::uint32 fboTexture_ = 0;
     int fboWidth_ = 0, fboHeight_ = 0;

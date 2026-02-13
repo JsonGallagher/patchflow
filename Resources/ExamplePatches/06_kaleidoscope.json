@@ -79,13 +79,59 @@
     }
   ],
   "connections": [
-    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
-    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
-    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
-    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
-    { "sourceNode": "node_5", "sourcePort": 2, "destNode": "node_6", "destPort": 0 },
-    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_7", "destPort": 0 },
-    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_7", "destPort": 1 },
-    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_8", "destPort": 0 }
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 0,
+      "destNode": "node_2",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 0,
+      "destNode": "node_3",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_2",
+      "sourcePort": 0,
+      "destNode": "node_5",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_3",
+      "sourcePort": 0,
+      "destNode": "node_4",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_5",
+      "sourcePort": 2,
+      "destNode": "node_6",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_4",
+      "sourcePort": 0,
+      "destNode": "node_7",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_6",
+      "sourcePort": 0,
+      "destNode": "node_7",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_7",
+      "sourcePort": 0,
+      "destNode": "node_8",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_2",
+      "sourcePort": 0,
+      "destNode": "node_7",
+      "destPort": 4
+    }
   ]
 }

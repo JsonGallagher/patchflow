@@ -14,10 +14,7 @@ GraphCompiler::GraphCompiler (GraphModel& model) : model_ (model)
 GraphCompiler::~GraphCompiler()
 {
     model_.removeListener (this);
-
-    // Clean up pending graph if audio thread never consumed it
-    RuntimeGraph* pending = pendingGraph_.exchange (nullptr);
-    delete pending;
+    pendingGraph_.store (nullptr, std::memory_order_release);
 }
 
 void GraphCompiler::graphChanged()
@@ -32,11 +29,14 @@ void GraphCompiler::compile()
         return;
 
     graph->prepareToPlay (currentSampleRate_, currentBlockSize_);
-    latestGraph_ = graph.get();
+    RuntimeGraph* graphPtr = graph.get();
+    compiledGraphs_.push_back (std::move (graph));
+    latestGraph_ = graphPtr;
 
-    // Publish for audio thread — delete old pending if it wasn't consumed
-    RuntimeGraph* old = pendingGraph_.exchange (graph.release(), std::memory_order_release);
-    delete old;
+    // Publish for audio thread. We retain ownership for app lifetime to ensure
+    // GL/audio threads never observe a graph that has been deleted.
+    RuntimeGraph* old = pendingGraph_.exchange (graphPtr, std::memory_order_release);
+    juce::ignoreUnused (old);
 }
 
 bool GraphCompiler::hasCycle (const std::vector<juce::String>& nodeIds,

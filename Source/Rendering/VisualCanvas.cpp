@@ -43,39 +43,46 @@ void VisualCanvas::renderOpenGL()
     juce::gl::glClear (juce::gl::GL_COLOR_BUFFER_BIT);
 
     bool hasOutput = false;
-
-    if (runtimeGraph_)
+    AnalysisSnapshot localSnapshot;
     {
-        visualNodeCount_ = static_cast<int> (runtimeGraph_->getVisualProcessOrder().size());
+        const juce::SpinLock::ScopedLockType lock (snapshotLock_);
+        localSnapshot = snapshot_;
+    }
+
+    auto* graph = runtimeGraph_.load (std::memory_order_acquire);
+    if (graph)
+    {
+        const auto& visualOrder = graph->getVisualProcessOrder();
+        visualNodeCount_.store (static_cast<int> (visualOrder.size()), std::memory_order_release);
 
         // Update visual nodes with latest analysis data
-        for (auto* node : runtimeGraph_->getVisualProcessOrder())
+        for (auto* node : visualOrder)
         {
             if (auto* wfn = dynamic_cast<WaveformRendererNode*> (node))
             {
-                if (snapshot_.hasData)
-                    wfn->updateWaveformSnapshot (snapshot_.latestFrame.waveform.data(),
-                                                  snapshot_.latestFrame.waveformSize);
+                if (localSnapshot.hasData)
+                    wfn->updateWaveformSnapshot (localSnapshot.latestFrame.waveform.data(),
+                                                  localSnapshot.latestFrame.waveformSize);
             }
             else if (auto* srn = dynamic_cast<SpectrumRendererNode*> (node))
             {
-                if (snapshot_.hasData)
-                    srn->updateMagnitudes (snapshot_.latestFrame.magnitudes.data(),
-                                            snapshot_.latestFrame.numBins);
+                if (localSnapshot.hasData)
+                    srn->updateMagnitudes (localSnapshot.latestFrame.magnitudes.data(),
+                                            localSnapshot.latestFrame.numBins);
             }
             else if (auto* svn = dynamic_cast<ShaderVisualNode*> (node))
             {
-                if (snapshot_.hasData)
-                    svn->updateMagnitudes (snapshot_.latestFrame.magnitudes.data(),
-                                            snapshot_.latestFrame.numBins);
+                if (localSnapshot.hasData)
+                    svn->updateMagnitudes (localSnapshot.latestFrame.magnitudes.data(),
+                                            localSnapshot.latestFrame.numBins);
             }
         }
 
         // Process visual nodes
-        runtimeGraph_->processVisualFrame (glContext_);
+        graph->processVisualFrame (glContext_);
 
         // Find OutputCanvas and blit its input texture
-        for (auto* node : runtimeGraph_->getVisualProcessOrder())
+        for (auto* node : visualOrder)
         {
             if (auto* canvas = dynamic_cast<OutputCanvasNode*> (node))
             {
@@ -90,14 +97,19 @@ void VisualCanvas::renderOpenGL()
             }
         }
     }
+    else
+    {
+        visualNodeCount_.store (0, std::memory_order_release);
+    }
 
     // If no graph or no output texture, show animated no-signal pattern
     if (! hasOutput)
         renderNoSignalPattern (width, height);
 
     auto endTick = juce::Time::getHighResolutionTicks();
-    frameTime_ = static_cast<float> (juce::Time::highResolutionTicksToSeconds (endTick - startTick));
-    frameCount_++;
+    frameTime_.store (static_cast<float> (juce::Time::highResolutionTicksToSeconds (endTick - startTick)),
+                      std::memory_order_release);
+    frameCount_.fetch_add (1, std::memory_order_relaxed);
 }
 
 void VisualCanvas::openGLContextClosing()
@@ -126,6 +138,7 @@ void VisualCanvas::timerCallback()
         AnalysisFrame frame;
         if (analysisFifo_->popLatestFrame (frame))
         {
+            const juce::SpinLock::ScopedLockType lock (snapshotLock_);
             snapshot_.latestFrame = frame;
             snapshot_.hasData = true;
         }
@@ -136,10 +149,12 @@ void VisualCanvas::timerCallback()
 void VisualCanvas::paint (juce::Graphics& g)
 {
     // FPS pill overlay at bottom-left
-    int fps = frameTime_ > 0.f ? static_cast<int> (1.f / frameTime_) : 0;
+    const auto frameTime = frameTime_.load (std::memory_order_acquire);
+    const auto visualNodeCount = visualNodeCount_.load (std::memory_order_acquire);
+    int fps = frameTime > 0.f ? static_cast<int> (1.f / frameTime) : 0;
     juce::String info = "FPS: " + juce::String (fps);
-    if (visualNodeCount_ > 0)
-        info += "  |  Nodes: " + juce::String (visualNodeCount_);
+    if (visualNodeCount > 0)
+        info += "  |  Nodes: " + juce::String (visualNodeCount);
 
     float textWidth = juce::Font (11.f).getStringWidthFloat (info) + 16.f;
     float pillWidth = juce::jmax (textWidth, 80.f);
