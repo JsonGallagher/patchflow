@@ -1,0 +1,67 @@
+{
+  "nodes": [
+    {
+      "id": "node_1",
+      "typeId": "AudioInput",
+      "x": 100,
+      "y": 300,
+      "params": {}
+    },
+    {
+      "id": "node_2",
+      "typeId": "FFTAnalyzer",
+      "x": 320,
+      "y": 200,
+      "params": {
+        "fftOrder": 11,
+        "windowType": 0
+      }
+    },
+    {
+      "id": "node_3",
+      "typeId": "EnvelopeFollower",
+      "x": 320,
+      "y": 420,
+      "params": {
+        "attackMs": 5.0,
+        "releaseMs": 80.0
+      }
+    },
+    {
+      "id": "node_4",
+      "typeId": "Smoothing",
+      "x": 520,
+      "y": 420,
+      "params": {
+        "smoothing": 0.85
+      }
+    },
+    {
+      "id": "node_5",
+      "typeId": "ShaderVisual",
+      "x": 740,
+      "y": 280,
+      "params": {
+        "fragmentShader": "uniform float u_time;\nuniform vec2 u_resolution;\nuniform float u_param1;\nuniform float u_param2;\nuniform float u_param3;\nuniform float u_param4;\nuniform sampler2D u_spectrum;\n\nfloat hash(vec2 p) {\n    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);\n}\n\nvoid main() {\n    vec2 uv = gl_FragCoord.xy / u_resolution;\n\n    float columns = 40.0;\n    float col_x = floor(uv.x * columns);\n    float cell_y = floor(uv.y * columns * 2.0);\n\n    float speed = 2.0 + hash(vec2(col_x, 0.0)) * 3.0;\n    speed *= 1.0 + u_param1 * 2.0;\n\n    float drop = fract(hash(vec2(col_x, 1.0)) + u_time * speed * 0.1);\n    float trail_length = 0.3 + hash(vec2(col_x, 2.0)) * 0.4;\n\n    float y_pos = 1.0 - drop;\n    float dist = uv.y - y_pos;\n\n    float trail = smoothstep(trail_length, 0.0, dist) * step(0.0, dist);\n    float head = smoothstep(0.02, 0.0, abs(dist)) * 1.5;\n\n    float brightness = trail + head;\n\n    float spec = texture2D(u_spectrum, vec2(uv.x, 0.0)).r;\n    brightness *= 0.5 + spec * 3.0;\n\n    float flicker = step(0.3, hash(vec2(col_x, cell_y + floor(u_time * 10.0))));\n    brightness *= 0.5 + flicker * 0.5;\n\n    vec3 color = vec3(0.1, 0.9, 0.3) * brightness;\n    color += vec3(0.8, 1.0, 0.8) * head * 0.5;\n\n    gl_FragColor = vec4(color, 1.0);\n}\n"
+      }
+    },
+    {
+      "id": "node_6",
+      "typeId": "OutputCanvas",
+      "x": 960,
+      "y": 280,
+      "params": {
+        "bgR": 0.0,
+        "bgG": 0.0,
+        "bgB": 0.0
+      }
+    }
+  ],
+  "connections": [
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_6", "destPort": 0 }
+  ]
+}

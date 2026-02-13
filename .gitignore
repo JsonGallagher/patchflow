@@ -1,0 +1,13 @@
+build/
+cmake-build-*/
+.DS_Store
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+*.o
+*.a
+*.dylib
+.idea/
+*.swp
+*~

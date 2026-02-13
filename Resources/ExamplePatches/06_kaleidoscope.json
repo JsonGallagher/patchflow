@@ -1,0 +1,91 @@
+{
+  "nodes": [
+    {
+      "id": "node_1",
+      "typeId": "AudioInput",
+      "x": 100,
+      "y": 300,
+      "params": {}
+    },
+    {
+      "id": "node_2",
+      "typeId": "FFTAnalyzer",
+      "x": 320,
+      "y": 200,
+      "params": {
+        "fftOrder": 11,
+        "windowType": 0
+      }
+    },
+    {
+      "id": "node_3",
+      "typeId": "EnvelopeFollower",
+      "x": 320,
+      "y": 400,
+      "params": {
+        "attackMs": 10.0,
+        "releaseMs": 120.0
+      }
+    },
+    {
+      "id": "node_4",
+      "typeId": "Smoothing",
+      "x": 520,
+      "y": 400,
+      "params": {
+        "smoothing": 0.91
+      }
+    },
+    {
+      "id": "node_5",
+      "typeId": "BandSplitter",
+      "x": 520,
+      "y": 200,
+      "params": {
+        "crossover1": 60.0,
+        "crossover2": 250.0,
+        "crossover3": 2000.0,
+        "crossover4": 6000.0
+      }
+    },
+    {
+      "id": "node_6",
+      "typeId": "Smoothing",
+      "x": 720,
+      "y": 200,
+      "params": {
+        "smoothing": 0.9
+      }
+    },
+    {
+      "id": "node_7",
+      "typeId": "ShaderVisual",
+      "x": 940,
+      "y": 280,
+      "params": {
+        "fragmentShader": "uniform float u_time;\nuniform vec2 u_resolution;\nuniform float u_param1;\nuniform float u_param2;\nuniform float u_param3;\nuniform float u_param4;\nuniform sampler2D u_spectrum;\n\nvoid main() {\n    vec2 uv = gl_FragCoord.xy / u_resolution;\n    vec2 p = uv * 2.0 - 1.0;\n    p.x *= u_resolution.x / u_resolution.y;\n\n    float angle = atan(p.y, p.x);\n    float radius = length(p);\n    float sectors = 6.0;\n    angle = mod(angle, 3.14159 * 2.0 / sectors);\n    angle = abs(angle - 3.14159 / sectors);\n\n    vec2 q = vec2(cos(angle), sin(angle)) * radius;\n\n    float env = u_param1;\n    float mid = u_param2;\n    float t = u_time * (0.5 + env * 0.5);\n\n    float pattern = sin(q.x * 8.0 + t) * cos(q.y * 8.0 - t * 0.7);\n    pattern += sin(length(q) * 12.0 - t * 2.0 + mid * 6.28) * 0.5;\n    pattern += cos(q.x * q.y * 20.0 + t * 0.3) * 0.3;\n\n    float spec = texture2D(u_spectrum, vec2(radius * 0.5, 0.0)).r;\n\n    vec3 col;\n    col.r = sin(pattern + spec * 3.0) * 0.5 + 0.5;\n    col.g = sin(pattern + 2.094 + spec * 2.0) * 0.5 + 0.5;\n    col.b = sin(pattern + 4.188 + spec * 4.0) * 0.5 + 0.5;\n\n    col *= 0.6 + env * 0.4;\n    col *= 1.0 - radius * 0.3;\n\n    gl_FragColor = vec4(col, 1.0);\n}\n"
+      }
+    },
+    {
+      "id": "node_8",
+      "typeId": "OutputCanvas",
+      "x": 1160,
+      "y": 280,
+      "params": {
+        "bgR": 0.0,
+        "bgG": 0.0,
+        "bgB": 0.0
+      }
+    }
+  ],
+  "connections": [
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 2, "destNode": "node_6", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_7", "destPort": 0 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_7", "destPort": 1 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_8", "destPort": 0 }
+  ]
+}

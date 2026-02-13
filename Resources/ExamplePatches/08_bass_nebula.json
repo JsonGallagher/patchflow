@@ -1,0 +1,117 @@
+{
+  "nodes": [
+    {
+      "id": "node_1",
+      "typeId": "AudioInput",
+      "x": 100,
+      "y": 300,
+      "params": {}
+    },
+    {
+      "id": "node_2",
+      "typeId": "FFTAnalyzer",
+      "x": 320,
+      "y": 250,
+      "params": {
+        "fftOrder": 11,
+        "windowType": 0
+      }
+    },
+    {
+      "id": "node_3",
+      "typeId": "BandSplitter",
+      "x": 520,
+      "y": 250,
+      "params": {
+        "crossover1": 60.0,
+        "crossover2": 250.0,
+        "crossover3": 2000.0,
+        "crossover4": 6000.0
+      }
+    },
+    {
+      "id": "node_4",
+      "typeId": "Smoothing",
+      "x": 720,
+      "y": 120,
+      "params": {
+        "smoothing": 0.95
+      }
+    },
+    {
+      "id": "node_5",
+      "typeId": "MapRange",
+      "x": 920,
+      "y": 120,
+      "params": {
+        "inMin": 0.0,
+        "inMax": 0.3,
+        "outMin": 0.0,
+        "outMax": 1.0
+      }
+    },
+    {
+      "id": "node_6",
+      "typeId": "Smoothing",
+      "x": 720,
+      "y": 260,
+      "params": {
+        "smoothing": 0.93
+      }
+    },
+    {
+      "id": "node_7",
+      "typeId": "MapRange",
+      "x": 920,
+      "y": 260,
+      "params": {
+        "inMin": 0.0,
+        "inMax": 0.3,
+        "outMin": 0.0,
+        "outMax": 1.0
+      }
+    },
+    {
+      "id": "node_8",
+      "typeId": "Smoothing",
+      "x": 720,
+      "y": 400,
+      "params": {
+        "smoothing": 0.9
+      }
+    },
+    {
+      "id": "node_9",
+      "typeId": "ShaderVisual",
+      "x": 1120,
+      "y": 280,
+      "params": {
+        "fragmentShader": "uniform float u_time;\nuniform vec2 u_resolution;\nuniform float u_param1;\nuniform float u_param2;\nuniform float u_param3;\nuniform float u_param4;\nuniform sampler2D u_spectrum;\n\nfloat noise(vec2 p) {\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    float a = fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453);\n    float b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(127.1, 311.7))) * 43758.5453);\n    float c = fract(sin(dot(i + vec2(0.0, 1.0), vec2(127.1, 311.7))) * 43758.5453);\n    float d = fract(sin(dot(i + vec2(1.0, 1.0), vec2(127.1, 311.7))) * 43758.5453);\n    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);\n}\n\nfloat fbm(vec2 p) {\n    float v = 0.0;\n    float a = 0.5;\n    for (int i = 0; i < 5; i++) {\n        v += a * noise(p);\n        p *= 2.0;\n        a *= 0.5;\n    }\n    return v;\n}\n\nvoid main() {\n    vec2 uv = gl_FragCoord.xy / u_resolution;\n    vec2 p = uv * 2.0 - 1.0;\n    p.x *= u_resolution.x / u_resolution.y;\n\n    float sub = u_param1;\n    float low = u_param2;\n    float mid = u_param3;\n    float t = u_time * 0.15;\n\n    float n1 = fbm(p * 2.0 + vec2(t, t * 0.5) + sub * 2.0);\n    float n2 = fbm(p * 3.0 - vec2(t * 0.7, t) + low * 1.5);\n    float n3 = fbm(p * 1.5 + vec2(n1, n2) * 0.5 + mid);\n\n    vec3 col1 = vec3(0.1, 0.0, 0.3);\n    vec3 col2 = vec3(0.4, 0.1, 0.5);\n    vec3 col3 = vec3(0.1, 0.3, 0.6);\n    vec3 col4 = vec3(0.8, 0.4, 0.1);\n\n    vec3 col = mix(col1, col2, n1);\n    col = mix(col, col3, n2 * (0.5 + low));\n    col = mix(col, col4, n3 * sub * 2.0);\n\n    col *= 0.6 + sub * 0.8;\n    col += vec3(0.1, 0.05, 0.15) * mid;\n\n    float stars = step(0.98, noise(uv * 200.0)) * (0.5 + mid);\n    col += vec3(stars);\n\n    gl_FragColor = vec4(col, 1.0);\n}\n"
+      }
+    },
+    {
+      "id": "node_10",
+      "typeId": "OutputCanvas",
+      "x": 1340,
+      "y": 280,
+      "params": {
+        "bgR": 0.0,
+        "bgG": 0.0,
+        "bgB": 0.0
+      }
+    }
+  ],
+  "connections": [
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 1, "destNode": "node_6", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 2, "destNode": "node_8", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_7", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_9", "destPort": 0 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_9", "destPort": 1 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_9", "destPort": 2 },
+    { "sourceNode": "node_9", "sourcePort": 0, "destNode": "node_10", "destPort": 0 }
+  ]
+}

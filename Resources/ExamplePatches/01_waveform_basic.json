@@ -1,0 +1,82 @@
+{
+  "nodes": [
+    {
+      "id": "node_1",
+      "typeId": "AudioInput",
+      "x": 100,
+      "y": 250,
+      "params": {}
+    },
+    {
+      "id": "node_2",
+      "typeId": "EnvelopeFollower",
+      "x": 320,
+      "y": 400,
+      "params": {
+        "attackMs": 10.0,
+        "releaseMs": 100.0
+      }
+    },
+    {
+      "id": "node_3",
+      "typeId": "Smoothing",
+      "x": 520,
+      "y": 400,
+      "params": {
+        "smoothing": 0.92
+      }
+    },
+    {
+      "id": "node_4",
+      "typeId": "MapRange",
+      "x": 720,
+      "y": 400,
+      "params": {
+        "inMin": 0.0,
+        "inMax": 0.5,
+        "outMin": 0.0,
+        "outMax": 1.0
+      }
+    },
+    {
+      "id": "node_5",
+      "typeId": "ColorMap",
+      "x": 920,
+      "y": 400,
+      "params": {
+        "palette": 0
+      }
+    },
+    {
+      "id": "node_6",
+      "typeId": "WaveformRenderer",
+      "x": 1120,
+      "y": 250,
+      "params": {
+        "lineThickness": 2.0,
+        "style": 0
+      }
+    },
+    {
+      "id": "node_7",
+      "typeId": "OutputCanvas",
+      "x": 1340,
+      "y": 250,
+      "params": {
+        "bgR": 0.0,
+        "bgG": 0.0,
+        "bgB": 0.0
+      }
+    }
+  ],
+  "connections": [
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_6", "destPort": 1 },
+    { "sourceNode": "node_5", "sourcePort": 1, "destNode": "node_6", "destPort": 2 },
+    { "sourceNode": "node_5", "sourcePort": 2, "destNode": "node_6", "destPort": 3 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_7", "destPort": 0 }
+  ]
+}
