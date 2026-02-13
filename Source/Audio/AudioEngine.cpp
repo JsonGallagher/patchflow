@@ -177,11 +177,18 @@ void AudioEngine::audioDeviceIOCallbackWithContext (
     {
         if (node->getTypeId() == "AudioInput")
         {
-            auto* buf = node->getAudioOutputBuffer (0);
-            if (buf)
+            auto* bufL = node->getAudioOutputBuffer (0);
+            auto* bufR = node->getAudioOutputBuffer (1);
+            if (bufL || bufR)
             {
                 int copySize = juce::jmin (numSamples, static_cast<int> (currentFrame_.waveform.size()));
-                std::memcpy (currentFrame_.waveform.data(), buf, sizeof (float) * static_cast<size_t> (copySize));
+                for (int i = 0; i < copySize; ++i)
+                {
+                    if (bufL && bufR)
+                        currentFrame_.waveform[static_cast<size_t> (i)] = 0.5f * (bufL[i] + bufR[i]);
+                    else
+                        currentFrame_.waveform[static_cast<size_t> (i)] = (bufL != nullptr) ? bufL[i] : bufR[i];
+                }
                 currentFrame_.waveformSize = copySize;
                 hasAnalysis = true;
             }

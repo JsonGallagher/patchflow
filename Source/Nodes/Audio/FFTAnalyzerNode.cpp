@@ -43,8 +43,10 @@ void FFTAnalyzerNode::applyWindow()
 
 void FFTAnalyzerNode::processBlock (int numSamples)
 {
-    auto* in = getConnectedAudioBuffer (0);
-    if (! in) return;
+    auto* inL = getConnectedAudioBuffer (0);
+    auto* inR = getConnectedAudioBuffer (1);
+    if (! inL && ! inR)
+        return;
 
     auto mags = getBufferOutputVec (0);
     int numBins = fftSize_ / 2;
@@ -54,7 +56,13 @@ void FFTAnalyzerNode::processBlock (int numSamples)
 
     for (int i = 0; i < numSamples; ++i)
     {
-        ringBuffer_[writePos_] = in[i];
+        float sample = 0.0f;
+        if (inL && inR)
+            sample = 0.5f * (inL[i] + inR[i]);
+        else
+            sample = (inL != nullptr) ? inL[i] : inR[i];
+
+        ringBuffer_[writePos_] = sample;
         if (++writePos_ >= fftSize_)
         {
             writePos_ = 0;

@@ -6,6 +6,7 @@
 #include "UI/CableComponent.h"
 #include "UI/NodePaletteComponent.h"
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 namespace pf
@@ -58,6 +59,8 @@ private:
     void updateCablePositions();
     void paintGrid (juce::Graphics& g);
     void deleteSelectedNodes();
+    std::optional<Connection> findConnectionForInputPort (const PortComponent* inputPort) const;
+    CableComponent* findCableAt (juce::Point<float> position) const;
 
     GraphModel& model_;
     InspectorPanel& inspector_;

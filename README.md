@@ -37,7 +37,8 @@ The window has 4 panels left-to-right: **Node Editor** | **Visual Output** | **I
 | Action | Input |
 |---|---|
 | Add nodes | Right-click canvas → pick from category |
-| Connect ports | Drag from output port to input port |
+| Connect ports | Drag between compatible input/output ports |
+| Rewire / disconnect | Drag from an input to a new output (or empty space to disconnect), or double-click a cable |
 | Move nodes | Click and drag the node header |
 | Zoom | `Cmd+Scroll` |
 | Pan | `Space+Drag` |

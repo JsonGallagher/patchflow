@@ -106,6 +106,9 @@ void NodeComponent::resized()
 
 void NodeComponent::mouseDown (const juce::MouseEvent& e)
 {
+    if (dynamic_cast<PortComponent*> (e.originalComponent) != nullptr)
+        return;
+
     if (e.mods.isRightButtonDown())
     {
         editor_.showNodeContextMenu (*this);

@@ -14,7 +14,8 @@ public:
 
     FFTAnalyzerNode()
     {
-        addInput  ("in",         PortType::Audio);
+        addInput  ("in_L",       PortType::Audio);
+        addInput  ("in_R",       PortType::Audio);
         addOutput ("magnitudes", PortType::Buffer);
         addOutput ("energy",     PortType::Signal);
         addParam  ("fftOrder",   11, 9, 13);

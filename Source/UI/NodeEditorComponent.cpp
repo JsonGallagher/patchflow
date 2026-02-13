@@ -91,10 +91,19 @@ void NodeEditorComponent::mouseDown (const juce::MouseEvent& e)
 
     // Check if we clicked on a port
     auto* port = findPortAt (e.getPosition().toFloat());
-    if (port && port->getDirection() == PortDirection::Output)
+    if (port != nullptr)
     {
         portDragStarted (port);
         return;
+    }
+
+    if (e.mods.isLeftButtonDown() && e.getNumberOfClicks() >= 2)
+    {
+        if (auto* cable = findCableAt (e.getPosition().toFloat()))
+        {
+            model_.removeConnection (cable->getConnection());
+            return;
+        }
     }
 
     if (e.mods.isMiddleButtonDown() || (e.mods.isLeftButtonDown() && juce::ModifierKeys::currentModifiers.isAltDown()))
@@ -237,16 +246,61 @@ void NodeEditorComponent::portDragMoved (juce::Point<float> position)
 
 void NodeEditorComponent::portDragEnded (PortComponent* targetPort)
 {
-    if (! dragSourcePort_ || ! targetPort) return;
-    if (targetPort->getDirection() != PortDirection::Input) return;
-    if (! canConnect (dragSourcePort_->getType(), targetPort->getType())) return;
-    if (&dragSourcePort_->getOwner() == &targetPort->getOwner()) return; // no self-connections
+    if (! dragSourcePort_)
+        return;
+
+    PortComponent* sourcePort = nullptr;
+    PortComponent* destPort = nullptr;
+
+    if (dragSourcePort_->getDirection() == PortDirection::Output)
+    {
+        sourcePort = dragSourcePort_;
+        if (targetPort != nullptr && targetPort->getDirection() == PortDirection::Input)
+            destPort = targetPort;
+    }
+    else
+    {
+        destPort = dragSourcePort_;
+        if (targetPort != nullptr && targetPort->getDirection() == PortDirection::Output)
+            sourcePort = targetPort;
+    }
+
+    // Dragging from an input to empty space disconnects it.
+    if (dragSourcePort_->getDirection() == PortDirection::Input && sourcePort == nullptr)
+    {
+        if (targetPort == dragSourcePort_)
+            return;
+
+        if (auto existing = findConnectionForInputPort (destPort))
+            model_.removeConnection (*existing);
+        return;
+    }
+
+    if (sourcePort == nullptr || destPort == nullptr)
+        return;
+
+    if (! canConnect (sourcePort->getType(), destPort->getType()))
+        return;
+
+    if (&sourcePort->getOwner() == &destPort->getOwner())
+        return; // no self-connections
+
+    if (auto existing = findConnectionForInputPort (destPort))
+    {
+        const bool sameConnection = (existing->sourceNode == sourcePort->getOwner().getNodeId()
+                                     && existing->sourcePort == sourcePort->getPortIndex());
+        if (sameConnection)
+            return;
+
+        // Replace existing destination connection on drop.
+        model_.removeConnection (*existing);
+    }
 
     Connection conn;
-    conn.sourceNode = dragSourcePort_->getOwner().getNodeId();
-    conn.sourcePort = dragSourcePort_->getPortIndex();
-    conn.destNode   = targetPort->getOwner().getNodeId();
-    conn.destPort   = targetPort->getPortIndex();
+    conn.sourceNode = sourcePort->getOwner().getNodeId();
+    conn.sourcePort = sourcePort->getPortIndex();
+    conn.destNode   = destPort->getOwner().getNodeId();
+    conn.destPort   = destPort->getPortIndex();
 
     model_.addConnection (conn);
 }
@@ -260,16 +314,47 @@ PortComponent* NodeEditorComponent::findPortAt (juce::Point<float> position) con
         for (int i = 0; i < nc->getNumInputPorts(); ++i)
         {
             auto* port = nc->getInputPort (i);
-            if (port->getBounds().toFloat().expanded (4.f).contains (localPos))
+            if (port->getBounds().toFloat().expanded (8.f).contains (localPos))
                 return port;
         }
         for (int i = 0; i < nc->getNumOutputPorts(); ++i)
         {
             auto* port = nc->getOutputPort (i);
-            if (port->getBounds().toFloat().expanded (4.f).contains (localPos))
+            if (port->getBounds().toFloat().expanded (8.f).contains (localPos))
                 return port;
         }
     }
+    return nullptr;
+}
+
+std::optional<Connection> NodeEditorComponent::findConnectionForInputPort (const PortComponent* inputPort) const
+{
+    if (inputPort == nullptr || inputPort->getDirection() != PortDirection::Input)
+        return std::nullopt;
+
+    const auto inputNodeId = inputPort->getOwner().getNodeId();
+    const auto inputPortIndex = inputPort->getPortIndex();
+    const auto connections = model_.getAllConnections();
+
+    for (const auto& connection : connections)
+    {
+        if (connection.destNode == inputNodeId && connection.destPort == inputPortIndex)
+            return connection;
+    }
+
+    return std::nullopt;
+}
+
+CableComponent* NodeEditorComponent::findCableAt (juce::Point<float> position) const
+{
+    for (auto it = cableComponents_.rbegin(); it != cableComponents_.rend(); ++it)
+    {
+        auto* cable = it->get();
+        const auto localPos = position - cable->getPosition().toFloat();
+        if (cable->hitTest (juce::roundToInt (localPos.x), juce::roundToInt (localPos.y)))
+            return cable;
+    }
+
     return nullptr;
 }
 

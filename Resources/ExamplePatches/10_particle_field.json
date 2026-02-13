@@ -158,6 +158,12 @@
       "sourcePort": 0,
       "destNode": "node_8",
       "destPort": 4
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 1,
+      "destNode": "node_2",
+      "destPort": 1
     }
   ]
 }
