@@ -46,11 +46,18 @@ private:
     juce::uint32 blitProgram_ = 0;
     juce::uint32 blitVBO_ = 0;
 
+    // No-signal animated pattern shader
+    juce::uint32 noSignalProgram_ = 0;
+    float noSignalTime_ = 0.f;
+
     void compileBlitShader();
+    void compileNoSignalShader();
+    void renderNoSignalPattern (int width, int height);
     void blitTextureToScreen (juce::uint32 texture);
 
     float frameTime_ = 0.f;
     int frameCount_ = 0;
+    int visualNodeCount_ = 0;
 };
 
 } // namespace pf

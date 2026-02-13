@@ -10,7 +10,7 @@ VisualCanvas::VisualCanvas()
 {
     glContext_.setRenderer (this);
     glContext_.setContinuousRepainting (true);
-    glContext_.setComponentPaintingEnabled (false);
+    glContext_.setComponentPaintingEnabled (true);
     glContext_.attachTo (*this);
 
     startTimerHz (60);
@@ -25,6 +25,7 @@ VisualCanvas::~VisualCanvas()
 void VisualCanvas::newOpenGLContextCreated()
 {
     compileBlitShader();
+    compileNoSignalShader();
 }
 
 void VisualCanvas::renderOpenGL()
@@ -34,12 +35,19 @@ void VisualCanvas::renderOpenGL()
     int width  = static_cast<int> (getWidth() * scale);
     int height = static_cast<int> (getHeight() * scale);
 
+    if (width <= 0 || height <= 0)
+        return;
+
     juce::gl::glViewport (0, 0, width, height);
     juce::gl::glClearColor (0.05f, 0.05f, 0.08f, 1.0f);
     juce::gl::glClear (juce::gl::GL_COLOR_BUFFER_BIT);
 
+    bool hasOutput = false;
+
     if (runtimeGraph_)
     {
+        visualNodeCount_ = static_cast<int> (runtimeGraph_->getVisualProcessOrder().size());
+
         // Update visual nodes with latest analysis data
         for (auto* node : runtimeGraph_->getVisualProcessOrder())
         {
@@ -76,11 +84,16 @@ void VisualCanvas::renderOpenGL()
                 {
                     juce::gl::glViewport (0, 0, width, height);
                     blitTextureToScreen (tex);
+                    hasOutput = true;
                 }
                 break;
             }
         }
     }
+
+    // If no graph or no output texture, show animated no-signal pattern
+    if (! hasOutput)
+        renderNoSignalPattern (width, height);
 
     auto endTick = juce::Time::getHighResolutionTicks();
     frameTime_ = static_cast<float> (juce::Time::highResolutionTicksToSeconds (endTick - startTick));
@@ -93,6 +106,11 @@ void VisualCanvas::openGLContextClosing()
     {
         glContext_.extensions.glDeleteProgram (blitProgram_);
         blitProgram_ = 0;
+    }
+    if (noSignalProgram_ != 0)
+    {
+        glContext_.extensions.glDeleteProgram (noSignalProgram_);
+        noSignalProgram_ = 0;
     }
     if (blitVBO_ != 0)
     {
@@ -112,17 +130,33 @@ void VisualCanvas::timerCallback()
             snapshot_.hasData = true;
         }
     }
+    repaint();
 }
 
 void VisualCanvas::paint (juce::Graphics& g)
 {
-    // This is called for the JUCE paint layer — show FPS overlay
-    g.setColour (juce::Colour (0x88000000));
-    g.fillRect (4, 4, 80, 20);
-    g.setColour (juce::Colours::white);
+    // FPS pill overlay at bottom-left
+    int fps = frameTime_ > 0.f ? static_cast<int> (1.f / frameTime_) : 0;
+    juce::String info = "FPS: " + juce::String (fps);
+    if (visualNodeCount_ > 0)
+        info += "  |  Nodes: " + juce::String (visualNodeCount_);
+
+    float textWidth = juce::Font (11.f).getStringWidthFloat (info) + 16.f;
+    float pillWidth = juce::jmax (textWidth, 80.f);
+    float pillHeight = 22.f;
+    float pillX = 8.f;
+    float pillY = static_cast<float> (getHeight()) - pillHeight - 8.f;
+
+    g.setColour (juce::Colour (0xaa101020));
+    g.fillRoundedRectangle (pillX, pillY, pillWidth, pillHeight, 11.f);
+    g.setColour (juce::Colour (0x44ffffff));
+    g.drawRoundedRectangle (pillX, pillY, pillWidth, pillHeight, 11.f, 0.5f);
+
+    g.setColour (juce::Colour (0xccffffff));
     g.setFont (11.f);
-    g.drawText ("FPS: " + juce::String (frameTime_ > 0.f ? static_cast<int> (1.f / frameTime_) : 0),
-                8, 4, 72, 20, juce::Justification::centredLeft);
+    g.drawText (info, static_cast<int> (pillX), static_cast<int> (pillY),
+                static_cast<int> (pillWidth), static_cast<int> (pillHeight),
+                juce::Justification::centred);
 }
 
 void VisualCanvas::compileBlitShader()
@@ -163,6 +197,80 @@ void VisualCanvas::compileBlitShader()
     glContext_.extensions.glBindBuffer (juce::gl::GL_ARRAY_BUFFER, blitVBO_);
     glContext_.extensions.glBufferData (juce::gl::GL_ARRAY_BUFFER, sizeof (quadVerts), quadVerts, juce::gl::GL_STATIC_DRAW);
     glContext_.extensions.glBindBuffer (juce::gl::GL_ARRAY_BUFFER, 0);
+}
+
+void VisualCanvas::compileNoSignalShader()
+{
+    const char* vertSrc =
+        "attribute vec2 a_position;\n"
+        "void main() {\n"
+        "    gl_Position = vec4(a_position, 0.0, 1.0);\n"
+        "}\n";
+
+    // Animated dot grid pattern
+    const char* fragSrc =
+        "uniform float u_time;\n"
+        "uniform vec2 u_resolution;\n"
+        "void main() {\n"
+        "    vec2 uv = gl_FragCoord.xy / u_resolution;\n"
+        "    vec2 p = uv * 2.0 - 1.0;\n"
+        "    p.x *= u_resolution.x / u_resolution.y;\n"
+        "    \n"
+        "    // Animated dot grid\n"
+        "    float gridSize = 0.15;\n"
+        "    vec2 grid = mod(p + 0.5 * gridSize, gridSize) - 0.5 * gridSize;\n"
+        "    float d = length(grid);\n"
+        "    float pulse = sin(u_time * 1.5 + length(p) * 3.0) * 0.5 + 0.5;\n"
+        "    float dot = smoothstep(0.025, 0.018, d) * (0.15 + pulse * 0.12);\n"
+        "    \n"
+        "    // Gentle radial vignette\n"
+        "    float vig = 1.0 - length(p) * 0.4;\n"
+        "    \n"
+        "    vec3 col = vec3(0.25, 0.3, 0.5) * dot * vig;\n"
+        "    col += vec3(0.03, 0.03, 0.06);\n"
+        "    gl_FragColor = vec4(col, 1.0);\n"
+        "}\n";
+
+    auto vs = glContext_.extensions.glCreateShader (juce::gl::GL_VERTEX_SHADER);
+    glContext_.extensions.glShaderSource (vs, 1, &vertSrc, nullptr);
+    glContext_.extensions.glCompileShader (vs);
+
+    auto fs = glContext_.extensions.glCreateShader (juce::gl::GL_FRAGMENT_SHADER);
+    glContext_.extensions.glShaderSource (fs, 1, &fragSrc, nullptr);
+    glContext_.extensions.glCompileShader (fs);
+
+    noSignalProgram_ = glContext_.extensions.glCreateProgram();
+    glContext_.extensions.glAttachShader (noSignalProgram_, vs);
+    glContext_.extensions.glAttachShader (noSignalProgram_, fs);
+    glContext_.extensions.glLinkProgram (noSignalProgram_);
+
+    glContext_.extensions.glDeleteShader (vs);
+    glContext_.extensions.glDeleteShader (fs);
+}
+
+void VisualCanvas::renderNoSignalPattern (int width, int height)
+{
+    if (noSignalProgram_ == 0 || blitVBO_ == 0) return;
+
+    noSignalTime_ += 1.f / 60.f;
+
+    glContext_.extensions.glUseProgram (noSignalProgram_);
+    glContext_.extensions.glUniform1f (
+        glContext_.extensions.glGetUniformLocation (noSignalProgram_, "u_time"), noSignalTime_);
+    glContext_.extensions.glUniform2f (
+        glContext_.extensions.glGetUniformLocation (noSignalProgram_, "u_resolution"),
+        static_cast<float> (width), static_cast<float> (height));
+
+    glContext_.extensions.glBindBuffer (juce::gl::GL_ARRAY_BUFFER, blitVBO_);
+    auto posLoc = glContext_.extensions.glGetAttribLocation (noSignalProgram_, "a_position");
+    glContext_.extensions.glEnableVertexAttribArray (posLoc);
+    glContext_.extensions.glVertexAttribPointer (posLoc, 2, juce::gl::GL_FLOAT, juce::gl::GL_FALSE, 0, nullptr);
+
+    juce::gl::glDrawArrays (juce::gl::GL_TRIANGLE_STRIP, 0, 4);
+
+    glContext_.extensions.glDisableVertexAttribArray (posLoc);
+    glContext_.extensions.glBindBuffer (juce::gl::GL_ARRAY_BUFFER, 0);
+    glContext_.extensions.glUseProgram (0);
 }
 
 void VisualCanvas::blitTextureToScreen (juce::uint32 texture)
