@@ -120,3 +120,12 @@ target_link_libraries(PatchFlow PRIVATE
 )
 
 target_include_directories(PatchFlow PRIVATE Source)
+
+# Bundle factory presets so the in-app preset dropdown works outside the source tree.
+add_custom_command(TARGET PatchFlow POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        "$<TARGET_FILE_DIR:PatchFlow>/../Resources/ExamplePatches"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Resources/ExamplePatches"
+        "$<TARGET_FILE_DIR:PatchFlow>/../Resources/ExamplePatches"
+)

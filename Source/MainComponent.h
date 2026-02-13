@@ -2,6 +2,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_audio_utils/juce_audio_utils.h>
+#include <vector>
 #include "Graph/GraphModel.h"
 #include "Graph/GraphCompiler.h"
 #include "Audio/AudioEngine.h"
@@ -34,9 +35,26 @@ public:
     void timerCallback() override;
 
 private:
+    struct PresetEntry
+    {
+        juce::String displayName;
+        juce::File file;
+        bool isFactory = false;
+    };
+
     void saveToFile();
     void loadFromFile();
     void showAudioSettings();
+    void refreshPresets (bool preserveSelection);
+    void loadPresetFile (const juce::File& file);
+    void saveCurrentAsPreset();
+    void updateSelectedPreset();
+    void deleteSelectedPreset();
+    void revealSelectedPresetInFinder();
+    void showPresetActionsMenu();
+    void updatePresetStatusLabel();
+    juce::File resolveFactoryPresetDirectory() const;
+    juce::File getUserPresetDirectory() const;
 
     GraphModel graphModel_;
     GraphCompiler graphCompiler_;
@@ -50,6 +68,14 @@ private:
     juce::StretchableLayoutResizerBar resizeBar_;
 
     std::unique_ptr<juce::MenuBarComponent> menuBar_;
+    juce::ComboBox presetComboBox_;
+    juce::TextButton presetActionsButton_ { "Preset..." };
+    juce::Label presetStatusLabel_;
+
+    std::vector<PresetEntry> presetEntries_;
+    juce::File selectedPresetFile_;
+    bool isRefreshingPresets_ = false;
+    int presetRowHeight_ = 30;
 };
 
 } // namespace pf

@@ -58,7 +58,16 @@ Ports connect to the same type. Signal can also connect to Visual (implicit rate
 
 ### Load a Preset
 
-**File → Open** → navigate to `Resources/ExamplePatches/` → pick any `.json` file.
+Use the **Preset** dropdown in the top bar to load factory or user presets instantly.
+
+Use the **Preset...** button for actions:
+- **Refresh Presets**
+- **Save As Preset...** (writes to user preset folder)
+- **Update Selected Preset**
+- **Reveal Selected Preset**
+- **Delete Selected User Preset**
+
+The old **File → Open** / **File → Save** flow still works for importing/exporting arbitrary JSON files.
 
 Recommended starting points:
 - `03_neon_glow.json` — pulsing neon sine waves driven by bass and highs
