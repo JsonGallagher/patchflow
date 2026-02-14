@@ -10,6 +10,12 @@
 #include "Nodes/Math/MapRangeNode.h"
 #include "Nodes/Math/ClampNode.h"
 #include "Nodes/Visual/ColorMapNode.h"
+#include "Nodes/Visual/BlendNode.h"
+#include "Nodes/Visual/TransformNode.h"
+#include "Nodes/Visual/FeedbackNode.h"
+#include "Nodes/Visual/KaleidoscopeNode.h"
+#include "Nodes/Visual/DisplaceNode.h"
+#include "Nodes/Visual/BloomNode.h"
 #include "Nodes/Visual/WaveformRendererNode.h"
 #include "Nodes/Visual/SpectrumRendererNode.h"
 #include "Nodes/Visual/ShaderVisualNode.h"
@@ -34,6 +40,12 @@ struct RegistryInitializer
         r.registerNode<MapRangeNode>();
         r.registerNode<ClampNode>();
         r.registerNode<ColorMapNode>();
+        r.registerNode<BlendNode>();
+        r.registerNode<TransformNode>();
+        r.registerNode<FeedbackNode>();
+        r.registerNode<KaleidoscopeNode>();
+        r.registerNode<DisplaceNode>();
+        r.registerNode<BloomNode>();
         r.registerNode<WaveformRendererNode>();
         r.registerNode<SpectrumRendererNode>();
         r.registerNode<ShaderVisualNode>();

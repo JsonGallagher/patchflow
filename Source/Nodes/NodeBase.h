@@ -189,7 +189,19 @@ public:
     int getParamAsInt (const juce::String& name, int fallback = 0) const
     {
         auto val = paramTree_.getProperty (juce::Identifier (name));
-        return val.isVoid() ? fallback : static_cast<int> (val);
+        if (val.isVoid())
+            return fallback;
+
+        if (val.isInt() || val.isInt64() || val.isBool())
+            return static_cast<int> (val);
+
+        if (val.isDouble())
+            return juce::roundToInt (static_cast<double> (val));
+
+        if (val.isString())
+            return val.toString().getIntValue();
+
+        return fallback;
     }
 
     //==============================================================================

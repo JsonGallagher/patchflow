@@ -31,6 +31,9 @@ private:
     {
         std::unique_ptr<juce::Label>  label;
         std::unique_ptr<juce::Slider> slider;
+        std::unique_ptr<juce::TextEditor> textEditor;
+        bool isDiscrete = false;
+        bool isText = false;
         juce::String paramName;
     };
     std::vector<ParamControl> controls_;

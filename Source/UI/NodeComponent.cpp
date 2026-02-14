@@ -160,7 +160,10 @@ juce::Colour NodeComponent::getHeaderColour() const
     if (typeId_ == "Add" || typeId_ == "Multiply" || typeId_ == "MapRange" || typeId_ == "Clamp")
         return juce::Colour (0xff4caf50);
     if (typeId_.containsIgnoreCase ("Renderer") || typeId_.containsIgnoreCase ("Shader")
-        || typeId_.containsIgnoreCase ("Canvas") || typeId_.containsIgnoreCase ("Color"))
+        || typeId_.containsIgnoreCase ("Canvas") || typeId_.containsIgnoreCase ("Color")
+        || typeId_.containsIgnoreCase ("Blend") || typeId_.containsIgnoreCase ("Transform")
+        || typeId_.containsIgnoreCase ("Feedback") || typeId_.containsIgnoreCase ("Kaleido")
+        || typeId_.containsIgnoreCase ("Displace") || typeId_.containsIgnoreCase ("Bloom"))
         return juce::Colour (0xff9c27b0);
     return juce::Colour (0xff607d8b);
 }

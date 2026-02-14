@@ -62,6 +62,18 @@ target_sources(PatchFlow PRIVATE
     Source/Nodes/Math/ClampNode.cpp
     Source/Nodes/Visual/ColorMapNode.h
     Source/Nodes/Visual/ColorMapNode.cpp
+    Source/Nodes/Visual/BlendNode.h
+    Source/Nodes/Visual/BlendNode.cpp
+    Source/Nodes/Visual/TransformNode.h
+    Source/Nodes/Visual/TransformNode.cpp
+    Source/Nodes/Visual/FeedbackNode.h
+    Source/Nodes/Visual/FeedbackNode.cpp
+    Source/Nodes/Visual/KaleidoscopeNode.h
+    Source/Nodes/Visual/KaleidoscopeNode.cpp
+    Source/Nodes/Visual/DisplaceNode.h
+    Source/Nodes/Visual/DisplaceNode.cpp
+    Source/Nodes/Visual/BloomNode.h
+    Source/Nodes/Visual/BloomNode.cpp
     Source/Nodes/Visual/WaveformRendererNode.h
     Source/Nodes/Visual/WaveformRendererNode.cpp
     Source/Nodes/Visual/SpectrumRendererNode.h

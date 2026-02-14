@@ -1,0 +1,240 @@
+{
+  "nodes": [
+    {
+      "id": "node_1",
+      "typeId": "AudioInput",
+      "x": 80,
+      "y": 300,
+      "params": {}
+    },
+    {
+      "id": "node_2",
+      "typeId": "FFTAnalyzer",
+      "x": 300,
+      "y": 220,
+      "params": {
+        "fftOrder": 11,
+        "windowType": 0
+      }
+    },
+    {
+      "id": "node_3",
+      "typeId": "EnvelopeFollower",
+      "x": 300,
+      "y": 420,
+      "params": {
+        "attackMs": 8.0,
+        "releaseMs": 120.0
+      }
+    },
+    {
+      "id": "node_4",
+      "typeId": "Smoothing",
+      "x": 520,
+      "y": 420,
+      "params": {
+        "smoothing": 0.9
+      }
+    },
+    {
+      "id": "node_5",
+      "typeId": "BandSplitter",
+      "x": 520,
+      "y": 220,
+      "params": {
+        "crossover1": 60.0,
+        "crossover2": 250.0,
+        "crossover3": 2000.0,
+        "crossover4": 6000.0
+      }
+    },
+    {
+      "id": "node_6",
+      "typeId": "Smoothing",
+      "x": 740,
+      "y": 220,
+      "params": {
+        "smoothing": 0.88
+      }
+    },
+    {
+      "id": "node_7",
+      "typeId": "Smoothing",
+      "x": 740,
+      "y": 340,
+      "params": {
+        "smoothing": 0.84
+      }
+    },
+    {
+      "id": "node_8",
+      "typeId": "ShaderVisual",
+      "x": 960,
+      "y": 260,
+      "params": {
+        "fragmentShader": "uniform float u_time;\nuniform vec2 u_resolution;\nuniform float u_param1;\nuniform float u_param2;\nuniform float u_param3;\nuniform float u_param4;\nuniform sampler2D u_spectrum;\n\nvec3 palette(float t) {\n    vec3 a = vec3(0.12, 0.08, 0.22);\n    vec3 b = vec3(0.34, 0.48, 0.86);\n    vec3 c = vec3(0.96, 0.34, 0.56);\n    vec3 d = vec3(1.0, 0.92, 0.52);\n    return mix(a, b, smoothstep(0.0, 0.45, t))\n         + mix(vec3(0.0), c, smoothstep(0.35, 0.78, t)) * 0.8\n         + mix(vec3(0.0), d, smoothstep(0.72, 1.0, t)) * 0.55;\n}\n\nvoid main() {\n    vec2 uv = gl_FragCoord.xy / u_resolution;\n    vec2 p = uv * 2.0 - 1.0;\n    p.x *= u_resolution.x / u_resolution.y;\n\n    float env = clamp(u_param1, 0.0, 1.0);\n    float mid = clamp(u_param2, 0.0, 1.0);\n    float high = clamp(u_param3, 0.0, 1.0);\n    float zoom = mix(0.65, 2.8, env);\n\n    vec2 c = vec2(-0.58 + (mid - 0.5) * 1.15, 0.08 + sin(u_time * 0.2) * 0.06 + (high - 0.5) * 0.6);\n    vec2 z = p * (1.55 / zoom);\n\n    float it = 0.0;\n    for (int i = 0; i < 72; ++i) {\n        z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;\n        if (dot(z, z) > 4.0) break;\n        it += 1.0;\n    }\n\n    float n = it / 72.0;\n    float spec = texture2D(u_spectrum, vec2(clamp(length(p) * 0.35, 0.0, 1.0), 0.0)).r;\n\n    vec3 col = palette(n);\n    col += vec3(0.22, 0.38, 0.95) * spec * (0.3 + high);\n    col *= 0.82 + env * 0.55;\n    col *= smoothstep(1.4, 0.12, length(p));\n\n    gl_FragColor = vec4(col, 1.0);\n}\n"
+      }
+    },
+    {
+      "id": "node_9",
+      "typeId": "Feedback",
+      "x": 1180,
+      "y": 260,
+      "params": {
+        "feedback": 0.87,
+        "mix": 1.0,
+        "offsetX": 0.001,
+        "offsetY": -0.001,
+        "zoom": 1.012,
+        "rotationDeg": 0.5,
+        "wrap": 1
+      }
+    },
+    {
+      "id": "node_10",
+      "typeId": "Transform",
+      "x": 1400,
+      "y": 260,
+      "params": {
+        "tx": 0.0,
+        "ty": 0.0,
+        "rotationDeg": 0.0,
+        "scale": 1.0,
+        "wrap": 1
+      }
+    },
+    {
+      "id": "node_11",
+      "typeId": "OutputCanvas",
+      "x": 1620,
+      "y": 260,
+      "params": {
+        "bgR": 0.0,
+        "bgG": 0.0,
+        "bgB": 0.0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 0,
+      "destNode": "node_2",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 1,
+      "destNode": "node_2",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 0,
+      "destNode": "node_3",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 1,
+      "destNode": "node_3",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_2",
+      "sourcePort": 0,
+      "destNode": "node_5",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_3",
+      "sourcePort": 0,
+      "destNode": "node_4",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_5",
+      "sourcePort": 2,
+      "destNode": "node_6",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_5",
+      "sourcePort": 3,
+      "destNode": "node_7",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_4",
+      "sourcePort": 0,
+      "destNode": "node_8",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_6",
+      "sourcePort": 0,
+      "destNode": "node_8",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_7",
+      "sourcePort": 0,
+      "destNode": "node_8",
+      "destPort": 2
+    },
+    {
+      "sourceNode": "node_2",
+      "sourcePort": 0,
+      "destNode": "node_8",
+      "destPort": 4
+    },
+    {
+      "sourceNode": "node_8",
+      "sourcePort": 0,
+      "destNode": "node_9",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_6",
+      "sourcePort": 0,
+      "destNode": "node_9",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_4",
+      "sourcePort": 0,
+      "destNode": "node_9",
+      "destPort": 2
+    },
+    {
+      "sourceNode": "node_7",
+      "sourcePort": 0,
+      "destNode": "node_9",
+      "destPort": 3
+    },
+    {
+      "sourceNode": "node_9",
+      "sourcePort": 0,
+      "destNode": "node_10",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_4",
+      "sourcePort": 0,
+      "destNode": "node_10",
+      "destPort": 3
+    },
+    {
+      "sourceNode": "node_6",
+      "sourcePort": 0,
+      "destNode": "node_10",
+      "destPort": 4
+    },
+    {
+      "sourceNode": "node_10",
+      "sourcePort": 0,
+      "destNode": "node_11",
+      "destPort": 0
+    }
+  ]
+}

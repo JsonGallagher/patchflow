@@ -74,6 +74,12 @@ Recommended starting points:
 - `03_neon_glow.json` — pulsing neon sine waves driven by bass and highs
 - `08_bass_nebula.json` — fractal noise nebula driven by low frequencies
 - `10_particle_field.json` — multi-layer starfield, each band drives a layer
+- `11_feedback_glitch_trails.json` — shader + feedback + blend chain for glitch trails
+- `12_fractal_feedback_zoom.json` — fractal shader with audio-driven recursive zoom
+- `13_dual_layer_feedback_mix.json` — waveform/spectrum layering with feedback echo
+- `14_kaleido_bloom_tunnel.json` — kaleidoscope tunnel with audio-reactive bloom
+- `15_audio_displace_lattice.json` — spectrum bars displaced by a reactive lattice map
+- `16_bloom_feedback_stack.json` — layered bloom + feedback + screen blend stack
 
 Play music or speak into your mic and watch the visual output react.
 
@@ -111,6 +117,12 @@ For shader-based visuals, swap Spectrum Renderer for **Shader Visual** and conne
 
 ### Visual
 - **Color Map** — Map a 0–1 value to a color (heat, rainbow, grayscale, cool)
+- **Blend** — Composite two texture streams (mix/add/multiply/screen/difference)
+- **Transform** — Translate/rotate/scale a texture stream
+- **Feedback** — Internal frame history for trails and recursive echoes
+- **Kaleidoscope** — Radial segment folding and mirrored pattern generation
+- **Displace** — Texture warping driven by a displacement texture
+- **Bloom** — Bright-pass glow with threshold/intensity/radius controls
 - **Waveform Renderer** — Render waveform to texture
 - **Spectrum Renderer** — Render spectrum bars to texture
 - **Shader Visual** — Custom GLSL fragment shader with audio-reactive uniforms
