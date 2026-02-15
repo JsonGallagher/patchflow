@@ -1,110 +1,41 @@
 {
   "nodes": [
-    {
-      "id": "node_1",
-      "typeId": "AudioInput",
-      "x": 100,
-      "y": 300,
-      "params": {}
-    },
-    {
-      "id": "node_2",
-      "typeId": "FFTAnalyzer",
-      "x": 320,
-      "y": 200,
-      "params": {
-        "fftOrder": 11,
-        "windowType": 0
-      }
-    },
-    {
-      "id": "node_3",
-      "typeId": "EnvelopeFollower",
-      "x": 320,
-      "y": 420,
-      "params": {
-        "attackMs": 8.0,
-        "releaseMs": 100.0
-      }
-    },
-    {
-      "id": "node_4",
-      "typeId": "Smoothing",
-      "x": 520,
-      "y": 420,
-      "params": {
-        "smoothing": 0.88
-      }
-    },
-    {
-      "id": "node_5",
-      "typeId": "ShaderVisual",
-      "x": 740,
-      "y": 280,
-      "params": {
-        "fragmentShader": "uniform float u_time;\nuniform vec2 u_resolution;\nuniform float u_param1;\nuniform float u_param2;\nuniform float u_param3;\nuniform float u_param4;\nuniform sampler2D u_spectrum;\n\nvoid main() {\n    vec2 uv = gl_FragCoord.xy / u_resolution;\n    float env = u_param1;\n    vec3 col = vec3(0.0);\n\n    if (uv.y > 0.52) {\n        float y = (uv.y - 0.75) * 4.0;\n        float x = uv.x;\n\n        float wave = sin(x * 20.0 + u_time * 3.0) * 0.3 * env;\n        wave += sin(x * 40.0 - u_time * 5.0) * 0.1;\n\n        float spec = texture2D(u_spectrum, vec2(x, 0.0)).r;\n        wave += sin(x * 10.0 + u_time) * spec * 0.5;\n\n        float d = abs(y - wave);\n        float glow = 0.008 / (d * d + 0.008);\n\n        col = vec3(0.2, 0.7, 1.0) * glow * 0.2;\n        col += vec3(0.4, 0.9, 1.0) * (0.002 / (d + 0.002)) * 0.3;\n    } else if (uv.y < 0.48) {\n        float x = uv.x;\n        float y = uv.y * 2.08;\n\n        float spec = texture2D(u_spectrum, vec2(x, 0.0)).r;\n        float barHeight = spec * (3.0 + env * 5.0);\n\n        float bar = step(y, barHeight);\n        float glow = 0.05 / (abs(y - barHeight) + 0.05);\n\n        col = vec3(1.0, 0.3, 0.5) * bar * 0.5;\n        col += vec3(1.0, 0.5, 0.7) * glow * 0.1;\n        col *= 0.5 + spec * 2.0;\n    }\n\n    float divider = 0.001 / (abs(uv.y - 0.5) + 0.001);\n    col += vec3(0.3, 0.3, 0.4) * divider * 0.05;\n\n    gl_FragColor = vec4(col, 1.0);\n}\n"
-      }
-    },
-    {
-      "id": "node_6",
-      "typeId": "OutputCanvas",
-      "x": 960,
-      "y": 280,
-      "params": {
-        "bgR": 0.0,
-        "bgG": 0.0,
-        "bgB": 0.0
-      }
-    }
+    { "id": "node_1", "typeId": "AudioInput", "x": 80, "y": 300, "params": {} },
+    { "id": "node_2", "typeId": "FFTAnalyzer", "x": 280, "y": 180, "params": { "fftOrder": 11, "windowType": 0 } },
+    { "id": "node_3", "typeId": "EnvelopeFollower", "x": 280, "y": 420, "params": { "attackMs": 6.0, "releaseMs": 80.0 } },
+    { "id": "node_4", "typeId": "Smoothing", "x": 480, "y": 420, "params": { "smoothing": 0.88 } },
+    { "id": "node_5", "typeId": "ColorMap", "x": 680, "y": 420, "params": { "palette": 1 } },
+    { "id": "node_6", "typeId": "SpectrumRenderer", "x": 520, "y": 140, "params": { "scale": 1, "barStyle": 2, "dbRange": -64.0 } },
+    { "id": "node_7", "typeId": "WaveformRenderer", "x": 520, "y": 340, "params": { "lineThickness": 2.5, "style": 2 } },
+    { "id": "node_8", "typeId": "Blend", "x": 900, "y": 240, "params": { "mode": 1, "mix": 0.55 } },
+    { "id": "node_9", "typeId": "Tile", "x": 1120, "y": 240, "params": {
+        "countX": 3, "countY": 3, "offsetX": 0.0, "offsetY": 0.0, "rotation": 0.0, "mirror": 1
+    } },
+    { "id": "node_10", "typeId": "Bloom", "x": 1340, "y": 240, "params": { "threshold": 0.3, "intensity": 1.6, "radius": 2.5 } },
+    { "id": "node_11", "typeId": "OutputCanvas", "x": 1560, "y": 240, "params": { "bgR": 0.0, "bgG": 0.0, "bgB": 0.0 } }
   ],
   "connections": [
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 0,
-      "destNode": "node_2",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 0,
-      "destNode": "node_3",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 0,
-      "destNode": "node_4",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_5",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_5",
-      "destPort": 4
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_2",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_3",
-      "destPort": 1
-    }
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 1, "destNode": "node_2", "destPort": 1 },
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 1, "destNode": "node_3", "destPort": 1 },
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_7", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_6", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_6", "destPort": 1 },
+    { "sourceNode": "node_5", "sourcePort": 1, "destNode": "node_6", "destPort": 2 },
+    { "sourceNode": "node_5", "sourcePort": 2, "destNode": "node_6", "destPort": 3 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_7", "destPort": 1 },
+    { "sourceNode": "node_5", "sourcePort": 1, "destNode": "node_7", "destPort": 2 },
+    { "sourceNode": "node_5", "sourcePort": 2, "destNode": "node_7", "destPort": 3 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_8", "destPort": 0 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_8", "destPort": 1 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_8", "destPort": 2 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_9", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_9", "destPort": 1 },
+    { "sourceNode": "node_9", "sourcePort": 0, "destNode": "node_10", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_10", "destPort": 2 },
+    { "sourceNode": "node_10", "sourcePort": 0, "destNode": "node_11", "destPort": 0 }
   ]
 }

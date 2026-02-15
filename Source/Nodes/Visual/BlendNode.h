@@ -14,8 +14,9 @@ public:
         addInput  ("mix",   PortType::Visual);
         addOutput ("texture", PortType::Texture);
 
-        addParam ("mode", 0, 0, 4);        // 0=mix, 1=add, 2=multiply, 3=screen, 4=difference
-        addParam ("mix", 0.5f, 0.0f, 1.0f);
+        addParam ("mode", 0, 0, 4, "Blend Mode", "How layers combine", "", "Blending",
+                  juce::StringArray { "Mix", "Add", "Multiply", "Screen", "Difference" });
+        addParam ("mix", 0.5f, 0.0f, 1.0f, "Mix", "Balance between inputs", "", "Blending");
     }
 
     juce::String getTypeId()      const override { return "Blend"; }

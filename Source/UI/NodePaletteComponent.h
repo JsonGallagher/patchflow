@@ -1,6 +1,7 @@
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "Nodes/NodeRegistry.h"
+#include "UI/Theme.h"
 
 namespace pf
 {
@@ -53,15 +54,15 @@ private:
             if (! entries || rowNumber >= static_cast<int> (entries->size())) return;
 
             if (isSelected)
-                g.fillAll (juce::Colour (0xff3a3a5a));
+                g.fillAll (juce::Colour (Theme::kBgHover));
 
             auto& entry = (*entries)[rowNumber];
-            g.setColour (juce::Colour (0xff888899));
-            g.setFont (10.f);
+            g.setColour (juce::Colour (Theme::kTextDim));
+            g.setFont (Theme::kFontSmall);
             g.drawText (entry.category, 8, 0, width, height, juce::Justification::topLeft);
 
-            g.setColour (juce::Colours::white);
-            g.setFont (13.f);
+            g.setColour (juce::Colour (Theme::kTextPrimary));
+            g.setFont (Theme::kFontNodeHeader);
             g.drawText (entry.displayName, 8, 4, width - 16, height, juce::Justification::centredLeft);
         }
 

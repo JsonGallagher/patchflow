@@ -14,9 +14,11 @@ public:
         addInput  ("color_g",    PortType::Visual);
         addInput  ("color_b",    PortType::Visual);
         addOutput ("texture",    PortType::Texture);
-        addParam  ("scale",    0, 0, 1);     // 0=linear, 1=log
-        addParam  ("barStyle", 0, 0, 2);     // 0=bars, 1=smooth, 2=filled
-        addParam  ("dbRange",  -60.0f, -90.0f, 0.0f);
+        addParam  ("scale",    0, 0, 1, "Scale", "Frequency axis scaling", "", "Display",
+                   juce::StringArray { "Linear", "Log" });
+        addParam  ("barStyle", 0, 0, 2, "Style", "Spectrum visualization style", "", "Display",
+                   juce::StringArray { "Bars", "Smooth", "Filled" });
+        addParam  ("dbRange",  -60.0f, -90.0f, 0.0f, "dB Range", "Minimum decibel level shown", "dB", "Display");
     }
 
     juce::String getTypeId()      const override { return "SpectrumRenderer"; }

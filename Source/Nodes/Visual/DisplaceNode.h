@@ -15,10 +15,12 @@ public:
         addInput  ("rotate",       PortType::Visual);
         addOutput ("texture",      PortType::Texture);
 
-        addParam ("amount", 0.03f, 0.0f, 0.5f);
-        addParam ("rotationDeg", 0.0f, -180.0f, 180.0f);
-        addParam ("mode", 1, 0, 1); // 0=luma axis, 1=RG vector
-        addParam ("wrap", 1, 0, 1);
+        addParam ("amount", 0.03f, 0.0f, 0.5f, "Amount", "Displacement strength", "", "Displacement");
+        addParam ("rotationDeg", 0.0f, -180.0f, 180.0f, "Rotation", "Displacement direction", "deg", "Displacement");
+        addParam ("mode", 1, 0, 1, "Mode", "How displacement is computed", "", "Displacement",
+                  juce::StringArray { "Luma Axis", "RG Vector" });
+        addParam ("wrap", 1, 0, 1, "Wrap", "Edge behavior", "", "Edge",
+                  juce::StringArray { "Clamp", "Repeat" });
     }
 
     juce::String getTypeId()      const override { return "Displace"; }

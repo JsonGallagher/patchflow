@@ -1,5 +1,6 @@
 #include "UI/NodePaletteComponent.h"
 #include "UI/NodeEditorComponent.h"
+#include "UI/Theme.h"
 
 namespace pf
 {
@@ -7,17 +8,17 @@ namespace pf
 NodePaletteComponent::NodePaletteComponent (NodeEditorComponent& editor)
     : editor_ (editor)
 {
-    searchBox_.setColour (juce::TextEditor::backgroundColourId, juce::Colour (0xff1e1e2e));
-    searchBox_.setColour (juce::TextEditor::textColourId, juce::Colours::white);
-    searchBox_.setColour (juce::TextEditor::outlineColourId, juce::Colour (0xff555566));
-    searchBox_.setTextToShowWhenEmpty ("Search nodes...", juce::Colour (0xff666677));
+    searchBox_.setColour (juce::TextEditor::backgroundColourId, juce::Colour (Theme::kBgSecondary));
+    searchBox_.setColour (juce::TextEditor::textColourId, juce::Colour (Theme::kTextPrimary));
+    searchBox_.setColour (juce::TextEditor::outlineColourId, juce::Colour (Theme::kBorderNormal));
+    searchBox_.setTextToShowWhenEmpty ("Search nodes...", juce::Colour (Theme::kTextPlaceholder));
     searchBox_.addListener (this);
     addAndMakeVisible (searchBox_);
 
     listModel_.entries = &entries_;
     listModel_.owner = this;
     listBox_.setModel (&listModel_);
-    listBox_.setColour (juce::ListBox::backgroundColourId, juce::Colour (0xff1a1a2a));
+    listBox_.setColour (juce::ListBox::backgroundColourId, juce::Colour (Theme::kBgPrimary));
     listBox_.setRowHeight (32);
     addAndMakeVisible (listBox_);
 
@@ -27,8 +28,8 @@ NodePaletteComponent::NodePaletteComponent (NodeEditorComponent& editor)
 
 void NodePaletteComponent::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour (0xff1a1a2a));
-    g.setColour (juce::Colour (0xff555566));
+    g.fillAll (juce::Colour (Theme::kBgPrimary));
+    g.setColour (juce::Colour (Theme::kBorderNormal));
     g.drawRect (getLocalBounds());
 }
 

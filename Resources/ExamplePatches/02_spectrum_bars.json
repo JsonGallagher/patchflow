@@ -3,14 +3,14 @@
     {
       "id": "node_1",
       "typeId": "AudioInput",
-      "x": 100,
-      "y": 300,
+      "x": 80,
+      "y": 280,
       "params": {}
     },
     {
       "id": "node_2",
       "typeId": "FFTAnalyzer",
-      "x": 320,
+      "x": 280,
       "y": 200,
       "params": {
         "fftOrder": 11,
@@ -20,47 +20,74 @@
     {
       "id": "node_3",
       "typeId": "EnvelopeFollower",
-      "x": 320,
-      "y": 450,
+      "x": 280,
+      "y": 400,
       "params": {
-        "attackMs": 10.0,
-        "releaseMs": 150.0
+        "attackMs": 5.0,
+        "releaseMs": 60.0
       }
     },
     {
       "id": "node_4",
       "typeId": "Smoothing",
-      "x": 520,
-      "y": 450,
+      "x": 480,
+      "y": 400,
       "params": {
-        "smoothing": 0.93
+        "smoothing": 0.85
       }
     },
     {
       "id": "node_5",
-      "typeId": "ColorMap",
-      "x": 720,
-      "y": 450,
+      "typeId": "SpectrumRenderer",
+      "x": 520,
+      "y": 200,
       "params": {
-        "palette": 3
+        "scale": 1,
+        "barStyle": 1,
+        "dbRange": -70.0
       }
     },
     {
       "id": "node_6",
-      "typeId": "SpectrumRenderer",
-      "x": 920,
-      "y": 250,
+      "typeId": "ChromaticAberration",
+      "x": 760,
+      "y": 200,
       "params": {
-        "scale": 1,
-        "barStyle": 0,
-        "dbRange": -60.0
+        "amount": 0.008,
+        "angle": 0.0,
+        "radial": 1
       }
     },
     {
       "id": "node_7",
+      "typeId": "Bloom",
+      "x": 1000,
+      "y": 200,
+      "params": {
+        "threshold": 0.25,
+        "intensity": 1.6,
+        "radius": 3.0
+      }
+    },
+    {
+      "id": "node_8",
+      "typeId": "ColorGrade",
+      "x": 1240,
+      "y": 200,
+      "params": {
+        "hueShift": 0.15,
+        "saturation": 1.5,
+        "brightness": 1.1,
+        "contrast": 1.3,
+        "gamma": 0.95,
+        "invert": 0
+      }
+    },
+    {
+      "id": "node_9",
       "typeId": "OutputCanvas",
-      "x": 1140,
-      "y": 250,
+      "x": 1460,
+      "y": 200,
       "params": {
         "bgR": 0.0,
         "bgG": 0.0,
@@ -77,8 +104,26 @@
     },
     {
       "sourceNode": "node_1",
+      "sourcePort": 1,
+      "destNode": "node_2",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_1",
       "sourcePort": 0,
       "destNode": "node_3",
+      "destPort": 0
+    },
+    {
+      "sourceNode": "node_1",
+      "sourcePort": 1,
+      "destNode": "node_3",
+      "destPort": 1
+    },
+    {
+      "sourceNode": "node_2",
+      "sourcePort": 0,
+      "destNode": "node_5",
       "destPort": 0
     },
     {
@@ -88,28 +133,16 @@
       "destPort": 0
     },
     {
-      "sourceNode": "node_4",
+      "sourceNode": "node_5",
       "sourcePort": 0,
-      "destNode": "node_5",
+      "destNode": "node_6",
       "destPort": 0
     },
     {
-      "sourceNode": "node_5",
+      "sourceNode": "node_4",
       "sourcePort": 0,
       "destNode": "node_6",
       "destPort": 1
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 1,
-      "destNode": "node_6",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 2,
-      "destNode": "node_6",
-      "destPort": 3
     },
     {
       "sourceNode": "node_6",
@@ -118,22 +151,28 @@
       "destPort": 0
     },
     {
-      "sourceNode": "node_2",
+      "sourceNode": "node_4",
       "sourcePort": 0,
-      "destNode": "node_6",
+      "destNode": "node_7",
+      "destPort": 2
+    },
+    {
+      "sourceNode": "node_7",
+      "sourcePort": 0,
+      "destNode": "node_8",
       "destPort": 0
     },
     {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_2",
+      "sourceNode": "node_4",
+      "sourcePort": 0,
+      "destNode": "node_8",
       "destPort": 1
     },
     {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_3",
-      "destPort": 1
+      "sourceNode": "node_8",
+      "sourcePort": 0,
+      "destNode": "node_9",
+      "destPort": 0
     }
   ]
 }

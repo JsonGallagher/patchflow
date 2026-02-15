@@ -1,5 +1,6 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "MainComponent.h"
+#include "UI/Theme.h"
 
 class PatchFlowApplication : public juce::JUCEApplication
 {
@@ -29,7 +30,7 @@ public:
     {
     public:
         explicit MainWindow (const juce::String& name)
-            : DocumentWindow (name, juce::Colour (0xff1a1a2a), DocumentWindow::allButtons)
+            : DocumentWindow (name, juce::Colour (pf::Theme::kBgPrimary), DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new pf::MainComponent(), true);

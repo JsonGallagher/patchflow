@@ -13,13 +13,27 @@ GraphCompiler::GraphCompiler (GraphModel& model) : model_ (model)
 
 GraphCompiler::~GraphCompiler()
 {
+    stopTimer();
     model_.removeListener (this);
     pendingGraph_.store (nullptr, std::memory_order_release);
 }
 
 void GraphCompiler::graphChanged()
 {
-    compile();
+    // Debounce: coalesce rapid changes (e.g. slider drags) into a single recompile
+    compilePending_ = true;
+    if (! isTimerRunning())
+        startTimer (16); // ~60 Hz max recompile rate
+}
+
+void GraphCompiler::timerCallback()
+{
+    stopTimer();
+    if (compilePending_)
+    {
+        compilePending_ = false;
+        compile();
+    }
 }
 
 void GraphCompiler::compile()
@@ -33,10 +47,16 @@ void GraphCompiler::compile()
     compiledGraphs_.push_back (std::move (graph));
     latestGraph_ = graphPtr;
 
-    // Publish for audio thread. We retain ownership for app lifetime to ensure
-    // GL/audio threads never observe a graph that has been deleted.
+    // Publish for audio thread
     RuntimeGraph* old = pendingGraph_.exchange (graphPtr, std::memory_order_release);
     juce::ignoreUnused (old);
+
+    // Retain only the last few graphs so audio/GL threads never see a freed pointer.
+    // Older graphs are safe to remove since they've been superseded.
+    constexpr size_t kMaxRetainedGraphs = 4;
+    if (compiledGraphs_.size() > kMaxRetainedGraphs)
+        compiledGraphs_.erase (compiledGraphs_.begin(),
+                               compiledGraphs_.end() - static_cast<std::ptrdiff_t> (kMaxRetainedGraphs));
 }
 
 bool GraphCompiler::hasCycle (const std::vector<juce::String>& nodeIds,

@@ -1,247 +1,46 @@
 {
   "nodes": [
-    {
-      "id": "node_1",
-      "typeId": "AudioInput",
-      "x": 80,
-      "y": 300,
-      "params": {}
-    },
-    {
-      "id": "node_2",
-      "typeId": "FFTAnalyzer",
-      "x": 300,
-      "y": 200,
-      "params": {
-        "fftOrder": 11,
-        "windowType": 0
-      }
-    },
-    {
-      "id": "node_3",
-      "typeId": "EnvelopeFollower",
-      "x": 300,
-      "y": 420,
-      "params": {
-        "attackMs": 8.0,
-        "releaseMs": 100.0
-      }
-    },
-    {
-      "id": "node_4",
-      "typeId": "Smoothing",
-      "x": 520,
-      "y": 420,
-      "params": {
-        "smoothing": 0.88
-      }
-    },
-    {
-      "id": "node_5",
-      "typeId": "ColorMap",
-      "x": 740,
-      "y": 420,
-      "params": {
-        "palette": 0
-      }
-    },
-    {
-      "id": "node_6",
-      "typeId": "SpectrumRenderer",
-      "x": 960,
-      "y": 180,
-      "params": {
-        "scale": 1,
-        "barStyle": 2,
-        "dbRange": -64.0
-      }
-    },
-    {
-      "id": "node_7",
-      "typeId": "BandSplitter",
-      "x": 520,
-      "y": 200,
-      "params": {
-        "crossover1": 60.0,
-        "crossover2": 250.0,
-        "crossover3": 2000.0,
-        "crossover4": 6000.0
-      }
-    },
-    {
-      "id": "node_8",
-      "typeId": "Smoothing",
-      "x": 740,
-      "y": 200,
-      "params": {
-        "smoothing": 0.84
-      }
-    },
-    {
-      "id": "node_9",
-      "typeId": "ShaderVisual",
-      "x": 960,
-      "y": 360,
-      "params": {
-        "fragmentShader": "uniform float u_time;\nuniform vec2 u_resolution;\nuniform float u_param1;\nuniform float u_param2;\nuniform float u_param3;\nuniform float u_param4;\nuniform sampler2D u_spectrum;\n\nfloat hash(vec2 p){\n    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);\n}\n\nvoid main() {\n    vec2 uv = gl_FragCoord.xy / u_resolution;\n    vec2 p = uv * 2.0 - 1.0;\n    p.x *= u_resolution.x / u_resolution.y;\n\n    float env = clamp(u_param1, 0.0, 1.0);\n    float high = clamp(u_param2, 0.0, 1.0);\n\n    vec2 grid = p * (12.0 + env * 18.0);\n    vec2 id = floor(grid);\n    vec2 f = fract(grid) - 0.5;\n\n    float rnd = hash(id);\n    float ring = smoothstep(0.42, 0.12, length(f + vec2(sin(u_time + rnd * 6.28) * 0.12, cos(u_time * 0.7 + rnd * 4.0) * 0.12)));\n\n    float spec = texture2D(u_spectrum, vec2(fract((id.x + id.y) * 0.03), 0.0)).r;\n    float pulse = 0.35 + spec * 4.0 + high * 1.2;\n\n    vec3 col = vec3(0.5 + rnd * 0.5, 0.2 + high * 0.8, 0.8) * ring * pulse;\n    col *= 0.5 + env * 0.8;\n\n    gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);\n}\n"
-      }
-    },
-    {
-      "id": "node_10",
-      "typeId": "Displace",
-      "x": 1180,
-      "y": 260,
-      "params": {
-        "amount": 0.08,
-        "rotationDeg": 0.0,
-        "mode": 1,
-        "wrap": 1
-      }
-    },
-    {
-      "id": "node_11",
-      "typeId": "OutputCanvas",
-      "x": 1400,
-      "y": 260,
-      "params": {
-        "bgR": 0.0,
-        "bgG": 0.0,
-        "bgB": 0.0
-      }
-    }
+    { "id": "node_1", "typeId": "AudioInput", "x": 80, "y": 300, "params": {} },
+    { "id": "node_2", "typeId": "FFTAnalyzer", "x": 280, "y": 200, "params": { "fftOrder": 11, "windowType": 0 } },
+    { "id": "node_3", "typeId": "BandSplitter", "x": 480, "y": 200, "params": { "crossover1": 60.0, "crossover2": 250.0, "crossover3": 2000.0, "crossover4": 6000.0 } },
+    { "id": "node_4", "typeId": "Smoothing", "x": 680, "y": 100, "params": { "smoothing": 0.92 } },
+    { "id": "node_5", "typeId": "Smoothing", "x": 680, "y": 300, "params": { "smoothing": 0.86 } },
+    { "id": "node_6", "typeId": "LFO", "x": 680, "y": 480, "params": { "waveform": 0, "frequency": 0.05, "amplitude": 0.9, "offset": 0.5, "phase": 0.0 } },
+    { "id": "node_7", "typeId": "Gradient", "x": 920, "y": 120, "params": {
+        "gradientType": 1, "rotation": 0.0, "offset": 0.0, "spread": 1.2,
+        "colorA_r": 0.0, "colorA_g": 0.05, "colorA_b": 0.2,
+        "colorB_r": 0.8, "colorB_g": 0.4, "colorB_b": 1.0
+    } },
+    { "id": "node_8", "typeId": "Noise", "x": 920, "y": 340, "params": {
+        "noiseType": 0, "scale": 6.0, "speed": 0.3, "octaves": 4,
+        "lacunarity": 2.0, "persistence": 0.5, "domainWarp": 0.5, "colorize": 0
+    } },
+    { "id": "node_9", "typeId": "Displace", "x": 1160, "y": 220, "params": { "amount": 0.06, "rotationDeg": 0.0, "mode": 1, "wrap": 1 } },
+    { "id": "node_10", "typeId": "EdgeDetect", "x": 1380, "y": 220, "params": { "mode": 0, "strength": 3.0, "invert": 0, "overlay": 1 } },
+    { "id": "node_11", "typeId": "ChromaticAberration", "x": 1600, "y": 220, "params": { "amount": 0.01, "angle": 0.0, "radial": 1 } },
+    { "id": "node_12", "typeId": "ColorGrade", "x": 1820, "y": 220, "params": {
+        "hueShift": 0.0, "saturation": 1.8, "brightness": 1.3, "contrast": 1.5, "gamma": 0.85, "invert": 0
+    } },
+    { "id": "node_13", "typeId": "OutputCanvas", "x": 2040, "y": 220, "params": { "bgR": 0.0, "bgG": 0.0, "bgB": 0.0 } }
   ],
   "connections": [
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 0,
-      "destNode": "node_2",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_2",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 0,
-      "destNode": "node_3",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_3",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 0,
-      "destNode": "node_4",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_5",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 1,
-      "destNode": "node_6",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 2,
-      "destNode": "node_6",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_7",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_7",
-      "sourcePort": 3,
-      "destNode": "node_8",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_8",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_7",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_7",
-      "sourcePort": 2,
-      "destNode": "node_9",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 4
-    },
-    {
-      "sourceNode": "node_6",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_9",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_8",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_10",
-      "sourcePort": 0,
-      "destNode": "node_11",
-      "destPort": 0
-    }
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 1, "destNode": "node_2", "destPort": 1 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 3, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_7", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_7", "destPort": 2 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_8", "destPort": 1 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_9", "destPort": 0 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_9", "destPort": 1 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_9", "destPort": 2 },
+    { "sourceNode": "node_9", "sourcePort": 0, "destNode": "node_10", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_10", "destPort": 1 },
+    { "sourceNode": "node_10", "sourcePort": 0, "destNode": "node_11", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_11", "destPort": 1 },
+    { "sourceNode": "node_11", "sourcePort": 0, "destNode": "node_12", "destPort": 0 },
+    { "sourceNode": "node_6", "sourcePort": 1, "destNode": "node_12", "destPort": 1 },
+    { "sourceNode": "node_12", "sourcePort": 0, "destNode": "node_13", "destPort": 0 }
   ]
 }

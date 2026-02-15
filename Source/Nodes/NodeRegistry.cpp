@@ -20,6 +20,27 @@
 #include "Nodes/Visual/SpectrumRendererNode.h"
 #include "Nodes/Visual/ShaderVisualNode.h"
 #include "Nodes/Visual/OutputCanvasNode.h"
+// New nodes
+#include "Nodes/Audio/BeatDetectorNode.h"
+#include "Nodes/Audio/SpectralFeaturesNode.h"
+#include "Nodes/Audio/ChromagramNode.h"
+#include "Nodes/Visual/NoiseNode.h"
+#include "Nodes/Visual/SDFShapeNode.h"
+#include "Nodes/Visual/GradientNode.h"
+#include "Nodes/Visual/PatternNode.h"
+#include "Nodes/Visual/BlurNode.h"
+#include "Nodes/Visual/MirrorNode.h"
+#include "Nodes/Visual/TileNode.h"
+#include "Nodes/Visual/EdgeDetectNode.h"
+#include "Nodes/Visual/ChromaticAberrationNode.h"
+#include "Nodes/Visual/ColorGradeNode.h"
+#include "Nodes/Visual/GlitchNode.h"
+#include "Nodes/Visual/LFONode.h"
+#include "Nodes/Visual/TriggerNode.h"
+#include "Nodes/Visual/StepSequencerNode.h"
+#include "Nodes/Visual/ReactionDiffusionNode.h"
+#include "Nodes/Visual/ParticleNode.h"
+#include "Nodes/Visual/TextureInputNode.h"
 
 namespace pf
 {
@@ -50,6 +71,27 @@ struct RegistryInitializer
         r.registerNode<SpectrumRendererNode>();
         r.registerNode<ShaderVisualNode>();
         r.registerNode<OutputCanvasNode>();
+        // New nodes
+        r.registerNode<BeatDetectorNode>();
+        r.registerNode<SpectralFeaturesNode>();
+        r.registerNode<ChromagramNode>();
+        r.registerNode<NoiseNode>();
+        r.registerNode<SDFShapeNode>();
+        r.registerNode<GradientNode>();
+        r.registerNode<PatternNode>();
+        r.registerNode<BlurNode>();
+        r.registerNode<MirrorNode>();
+        r.registerNode<TileNode>();
+        r.registerNode<EdgeDetectNode>();
+        r.registerNode<ChromaticAberrationNode>();
+        r.registerNode<ColorGradeNode>();
+        r.registerNode<GlitchNode>();
+        r.registerNode<LFONode>();
+        r.registerNode<TriggerNode>();
+        r.registerNode<StepSequencerNode>();
+        r.registerNode<ReactionDiffusionNode>();
+        r.registerNode<ParticleNode>();
+        r.registerNode<TextureInputNode>();
     }
 };
 

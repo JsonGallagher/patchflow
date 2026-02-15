@@ -50,6 +50,9 @@ public:
     // Add node
     void addNodeAt (const juce::String& typeId, float x, float y);
 
+    // View
+    void zoomToFit();
+
     //==============================================================================
     // GraphModel::Listener
     void graphChanged() override;
@@ -59,8 +62,17 @@ private:
     void updateCablePositions();
     void paintGrid (juce::Graphics& g);
     void deleteSelectedNodes();
+    void selectAllNodes();
+    void duplicateSelectedNodes();
     std::optional<Connection> findConnectionForInputPort (const PortComponent* inputPort) const;
     CableComponent* findCableAt (juce::Point<float> position) const;
+
+    // Port highlighting during cable drag
+    void updatePortHighlights();
+    void clearPortHighlights();
+
+    // Grid snap
+    static juce::Point<float> snapToGrid (juce::Point<float> pos);
 
     GraphModel& model_;
     InspectorPanel& inspector_;
@@ -72,6 +84,11 @@ private:
 
     // Selection
     std::vector<juce::String> selectedNodes_;
+
+    // Lasso selection
+    bool isLassoing_ = false;
+    juce::Point<float> lassoStart_;
+    juce::Rectangle<float> lassoRect_;
 
     // Cable dragging state
     PortComponent* dragSourcePort_ = nullptr;

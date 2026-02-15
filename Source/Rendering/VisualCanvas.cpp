@@ -1,4 +1,5 @@
 #include "Rendering/VisualCanvas.h"
+#include "UI/Theme.h"
 #include "Nodes/Visual/WaveformRendererNode.h"
 #include "Nodes/Visual/SpectrumRendererNode.h"
 #include "Nodes/Visual/ShaderVisualNode.h"
@@ -156,19 +157,19 @@ void VisualCanvas::paint (juce::Graphics& g)
     if (visualNodeCount > 0)
         info += "  |  Nodes: " + juce::String (visualNodeCount);
 
-    float textWidth = juce::Font (11.f).getStringWidthFloat (info) + 16.f;
+    float textWidth = juce::Font (Theme::kFontGroupHeader).getStringWidthFloat (info) + 16.f;
     float pillWidth = juce::jmax (textWidth, 80.f);
     float pillHeight = 22.f;
     float pillX = 8.f;
     float pillY = static_cast<float> (getHeight()) - pillHeight - 8.f;
 
-    g.setColour (juce::Colour (0xaa101020));
+    g.setColour (juce::Colour (Theme::kBgPrimary).withAlpha (0.75f));
     g.fillRoundedRectangle (pillX, pillY, pillWidth, pillHeight, 11.f);
-    g.setColour (juce::Colour (0x44ffffff));
+    g.setColour (juce::Colour (Theme::kBorderSubtle));
     g.drawRoundedRectangle (pillX, pillY, pillWidth, pillHeight, 11.f, 0.5f);
 
-    g.setColour (juce::Colour (0xccffffff));
-    g.setFont (11.f);
+    g.setColour (juce::Colour (Theme::kTextSecondary));
+    g.setFont (Theme::kFontGroupHeader);
     g.drawText (info, static_cast<int> (pillX), static_cast<int> (pillY),
                 static_cast<int> (pillWidth), static_cast<int> (pillHeight),
                 juce::Justification::centred);

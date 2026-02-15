@@ -15,9 +15,9 @@ public:
         addInput  ("radius",    PortType::Visual);
         addOutput ("texture",   PortType::Texture);
 
-        addParam ("threshold", 0.6f, 0.0f, 1.0f);
-        addParam ("intensity", 0.9f, 0.0f, 2.5f);
-        addParam ("radius", 1.6f, 0.1f, 6.0f);
+        addParam ("threshold", 0.6f, 0.0f, 1.0f, "Threshold", "Brightness cutoff for bloom", "", "Bloom");
+        addParam ("intensity", 0.9f, 0.0f, 2.5f, "Intensity", "Bloom glow strength", "", "Bloom");
+        addParam ("radius", 1.6f, 0.1f, 6.0f, "Radius", "Bloom spread size", "px", "Bloom");
     }
 
     juce::String getTypeId()      const override { return "Bloom"; }

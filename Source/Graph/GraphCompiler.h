@@ -16,7 +16,8 @@ namespace pf
  * 3. Builds new RuntimeGraph with pre-resolved connections
  * 4. Publishes via atomic pointer for audio thread
  */
-class GraphCompiler : public GraphModel::Listener
+class GraphCompiler : public GraphModel::Listener,
+                       private juce::Timer
 {
 public:
     explicit GraphCompiler (GraphModel& model);
@@ -54,8 +55,11 @@ private:
     double currentSampleRate_ = 44100.0;
     int currentBlockSize_ = 512;
 
+    void timerCallback() override;
+
     bool hasError_ = false;
     juce::String errorMessage_;
+    bool compilePending_ = false;
 
 public:
     void setSampleRateAndBlockSize (double sr, int bs)

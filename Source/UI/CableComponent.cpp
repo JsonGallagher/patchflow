@@ -7,6 +7,14 @@ CableComponent::CableComponent (const Connection& connection, PortType type)
     : connection_ (connection), type_ (type)
 {
     setInterceptsMouseClicks (false, false);
+    startTimerHz (30);
+}
+
+void CableComponent::timerCallback()
+{
+    flowPhase_ += 0.08f;
+    if (flowPhase_ > 100.f) flowPhase_ -= 100.f;
+    repaint();
 }
 
 void CableComponent::setEndPoints (juce::Point<float> start, juce::Point<float> end)
@@ -15,7 +23,7 @@ void CableComponent::setEndPoints (juce::Point<float> start, juce::Point<float> 
     endPoint_ = end;
     updatePath();
 
-    auto pathBounds = cablePath_.getBounds().expanded (4.f).getSmallestIntegerContainer();
+    auto pathBounds = cablePath_.getBounds().expanded (6.f).getSmallestIntegerContainer();
     setBounds (pathBounds);
 }
 
@@ -36,18 +44,34 @@ void CableComponent::updatePath()
 
 void CableComponent::paint (juce::Graphics& g)
 {
-    auto colour = getPortColour (type_).withAlpha (0.8f);
-    g.setColour (colour);
+    auto colour = getPortColour (type_);
 
     juce::Path localPath (cablePath_);
     localPath.applyTransform (juce::AffineTransform::translation (
         static_cast<float> (-getX()), static_cast<float> (-getY())));
 
+    // Outer glow
+    g.setColour (colour.withAlpha (0.1f));
+    g.strokePath (localPath, juce::PathStrokeType (8.f, juce::PathStrokeType::curved));
+
+    // Main cable
+    g.setColour (colour.withAlpha (0.7f));
     g.strokePath (localPath, juce::PathStrokeType (2.5f, juce::PathStrokeType::curved));
 
-    // Draw glow
-    g.setColour (colour.withAlpha (0.15f));
-    g.strokePath (localPath, juce::PathStrokeType (6.f, juce::PathStrokeType::curved));
+    // Animated flow dots along path
+    float pathLength = localPath.getLength();
+    if (pathLength < 1.f) return;
+
+    float dotSpacing = 18.f;
+    float dotRadius = 2.2f;
+    g.setColour (colour.withAlpha (0.9f));
+
+    float offset = std::fmod (flowPhase_ * dotSpacing, dotSpacing);
+    for (float d = offset; d < pathLength; d += dotSpacing)
+    {
+        auto pt = localPath.getPointAlongPath (d);
+        g.fillEllipse (pt.x - dotRadius, pt.y - dotRadius, dotRadius * 2.f, dotRadius * 2.f);
+    }
 }
 
 bool CableComponent::hitTest (int x, int y)

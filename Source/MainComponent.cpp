@@ -1,4 +1,5 @@
 #include "MainComponent.h"
+#include "UI/Theme.h"
 #include <algorithm>
 
 namespace pf
@@ -60,7 +61,7 @@ MainComponent::MainComponent()
     addAndMakeVisible (presetActionsButton_);
 
     presetStatusLabel_.setJustificationType (juce::Justification::centredLeft);
-    presetStatusLabel_.setColour (juce::Label::textColourId, juce::Colours::whitesmoke.withAlpha (0.82f));
+    presetStatusLabel_.setColour (juce::Label::textColourId, juce::Colour (Theme::kPresetStatusText));
     presetStatusLabel_.setText ("No preset loaded", juce::dontSendNotification);
     addAndMakeVisible (presetStatusLabel_);
 
@@ -106,7 +107,14 @@ MainComponent::~MainComponent()
 
 void MainComponent::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour (0xff1a1a2a));
+    g.fillAll (juce::Colour (Theme::kBgPrimary));
+
+    // Preset row background
+    auto presetRowBounds = juce::Rectangle<int> (0, kMenuBarHeight, getWidth(), presetRowHeight_);
+    g.setColour (juce::Colour (Theme::kPresetRowBg));
+    g.fillRect (presetRowBounds);
+    g.setColour (juce::Colour (Theme::kBorderSubtle));
+    g.drawHorizontalLine (kMenuBarHeight + presetRowHeight_ - 1, 0.f, static_cast<float> (getWidth()));
 }
 
 void MainComponent::resized()
@@ -179,6 +187,7 @@ void MainComponent::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         case 4:  showAudioSettings(); break;
         case 10: graphModel_.getUndoManager().undo(); break;
         case 11: graphModel_.getUndoManager().redo(); break;
+        case 20: nodeEditor_.zoomToFit(); break;
         default: break;
     }
 }
@@ -244,7 +253,7 @@ void MainComponent::showAudioSettings()
     juce::DialogWindow::LaunchOptions opts;
     opts.content.setOwned (selector);
     opts.dialogTitle = "Audio Settings";
-    opts.dialogBackgroundColour = juce::Colour (0xff1a1a2a);
+    opts.dialogBackgroundColour = juce::Colour (Theme::kBgPrimary);
     opts.escapeKeyTriggersCloseButton = true;
     opts.useNativeTitleBar = true;
     opts.resizable = false;

@@ -1,233 +1,67 @@
 {
   "nodes": [
-    {
-      "id": "node_1",
-      "typeId": "AudioInput",
-      "x": 80,
-      "y": 300,
-      "params": {}
-    },
-    {
-      "id": "node_2",
-      "typeId": "FFTAnalyzer",
-      "x": 300,
-      "y": 200,
-      "params": {
-        "fftOrder": 11,
-        "windowType": 0
-      }
-    },
-    {
-      "id": "node_3",
-      "typeId": "BandSplitter",
-      "x": 520,
-      "y": 200,
-      "params": {
-        "crossover1": 60.0,
-        "crossover2": 250.0,
-        "crossover3": 2000.0,
-        "crossover4": 6000.0
-      }
-    },
-    {
-      "id": "node_4",
-      "typeId": "Smoothing",
-      "x": 740,
-      "y": 120,
-      "params": {
-        "smoothing": 0.9
-      }
-    },
-    {
-      "id": "node_5",
-      "typeId": "Smoothing",
-      "x": 740,
-      "y": 300,
-      "params": {
-        "smoothing": 0.82
-      }
-    },
-    {
-      "id": "node_6",
-      "typeId": "ShaderVisual",
-      "x": 960,
-      "y": 220,
-      "params": {}
-    },
-    {
-      "id": "node_7",
-      "typeId": "Bloom",
-      "x": 1180,
-      "y": 220,
-      "params": {
-        "threshold": 0.55,
-        "intensity": 1.0,
-        "radius": 2.0
-      }
-    },
-    {
-      "id": "node_8",
-      "typeId": "Feedback",
-      "x": 1400,
-      "y": 220,
-      "params": {
-        "feedback": 0.86,
-        "mix": 1.0,
-        "offsetX": 0.002,
-        "offsetY": -0.001,
-        "zoom": 1.005,
-        "rotationDeg": 0.35,
-        "wrap": 1
-      }
-    },
-    {
-      "id": "node_9",
-      "typeId": "Blend",
-      "x": 1620,
-      "y": 220,
-      "params": {
-        "mode": 3,
-        "mix": 0.54
-      }
-    },
-    {
-      "id": "node_10",
-      "typeId": "OutputCanvas",
-      "x": 1840,
-      "y": 220,
-      "params": {
-        "bgR": 0.0,
-        "bgG": 0.0,
-        "bgB": 0.0
-      }
-    }
+    { "id": "node_1", "typeId": "AudioInput", "x": 80, "y": 300, "params": {} },
+    { "id": "node_2", "typeId": "FFTAnalyzer", "x": 280, "y": 200, "params": { "fftOrder": 11, "windowType": 0 } },
+    { "id": "node_3", "typeId": "BandSplitter", "x": 480, "y": 200, "params": { "crossover1": 60.0, "crossover2": 250.0, "crossover3": 2000.0, "crossover4": 6000.0 } },
+    { "id": "node_4", "typeId": "BeatDetector", "x": 480, "y": 440, "params": { "sensitivity": 1.5, "minBPM": 60.0, "maxBPM": 200.0, "mode": 1 } },
+    { "id": "node_5", "typeId": "Smoothing", "x": 700, "y": 100, "params": { "smoothing": 0.92 } },
+    { "id": "node_6", "typeId": "Smoothing", "x": 700, "y": 300, "params": { "smoothing": 0.86 } },
+    { "id": "node_7", "typeId": "LFO", "x": 700, "y": 520, "params": { "waveform": 0, "frequency": 0.1, "amplitude": 0.7, "offset": 0.5, "phase": 0.0 } },
+    { "id": "node_8", "typeId": "Trigger", "x": 700, "y": 440, "params": { "attackMs": 1.0, "decayMs": 350.0, "shape": 0 } },
+    { "id": "node_9", "typeId": "StepSequencer", "x": 700, "y": 640, "params": {
+        "steps": 8, "step1": 0.8, "step2": 0.2, "step3": 0.9, "step4": 0.1,
+        "step5": 0.7, "step6": 0.3, "step7": 1.0, "step8": 0.0, "mode": 0, "speed": 2.0
+    } },
+    { "id": "node_10", "typeId": "Noise", "x": 940, "y": 120, "params": {
+        "noiseType": 1, "scale": 5.0, "speed": 0.3, "octaves": 4,
+        "lacunarity": 2.0, "persistence": 0.5, "domainWarp": 0.6, "colorize": 1
+    } },
+    { "id": "node_11", "typeId": "SDFShape", "x": 940, "y": 380, "params": {
+        "shape": 6, "radius": 0.2, "edgeSoftness": 0.01, "rotation": 0.0,
+        "repeatX": 1, "repeatY": 1, "ringThickness": 0.05, "starPoints": 8, "fillColor": 2
+    } },
+    { "id": "node_12", "typeId": "Kaleidoscope", "x": 1180, "y": 120, "params": { "segments": 6, "rotationDeg": 0.0, "zoom": 1.2, "mirror": 1, "wrap": 1 } },
+    { "id": "node_13", "typeId": "Blend", "x": 1180, "y": 300, "params": { "mode": 1, "mix": 0.4 } },
+    { "id": "node_14", "typeId": "Feedback", "x": 1420, "y": 260, "params": {
+        "feedback": 0.88, "mix": 1.0, "offsetX": 0.003, "offsetY": -0.001, "zoom": 1.008, "rotationDeg": 0.5, "wrap": 1
+    } },
+    { "id": "node_15", "typeId": "Glitch", "x": 1640, "y": 260, "params": {
+        "intensity": 0.15, "blockSize": 0.05, "rgbSplit": 0.012, "scanlines": 0.3, "noiseAmount": 0.06, "speed": 1.5
+    } },
+    { "id": "node_16", "typeId": "ChromaticAberration", "x": 1860, "y": 260, "params": { "amount": 0.008, "angle": 0.0, "radial": 1 } },
+    { "id": "node_17", "typeId": "ColorGrade", "x": 2080, "y": 260, "params": {
+        "hueShift": 0.0, "saturation": 1.6, "brightness": 1.1, "contrast": 1.3, "gamma": 0.9, "invert": 0
+    } },
+    { "id": "node_18", "typeId": "Bloom", "x": 2300, "y": 260, "params": { "threshold": 0.35, "intensity": 1.4, "radius": 2.5 } },
+    { "id": "node_19", "typeId": "OutputCanvas", "x": 2520, "y": 260, "params": { "bgR": 0.0, "bgG": 0.0, "bgB": 0.0 } }
   ],
   "connections": [
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 0,
-      "destNode": "node_2",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_2",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_3",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 0,
-      "destNode": "node_4",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 4,
-      "destNode": "node_5",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 2,
-      "destNode": "node_6",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 3,
-      "destNode": "node_6",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 4
-    },
-    {
-      "sourceNode": "node_6",
-      "sourcePort": 0,
-      "destNode": "node_7",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_7",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_7",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_7",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 3,
-      "destNode": "node_8",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_6",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_8",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_9",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 0
-    }
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 1, "destNode": "node_2", "destPort": 1 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 3, "destNode": "node_6", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_8", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_10", "destPort": 0 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_10", "destPort": 1 },
+    { "sourceNode": "node_9", "sourcePort": 0, "destNode": "node_11", "destPort": 0 },
+    { "sourceNode": "node_10", "sourcePort": 0, "destNode": "node_12", "destPort": 0 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_12", "destPort": 2 },
+    { "sourceNode": "node_12", "sourcePort": 0, "destNode": "node_13", "destPort": 0 },
+    { "sourceNode": "node_11", "sourcePort": 0, "destNode": "node_13", "destPort": 1 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_13", "destPort": 2 },
+    { "sourceNode": "node_13", "sourcePort": 0, "destNode": "node_14", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_14", "destPort": 1 },
+    { "sourceNode": "node_14", "sourcePort": 0, "destNode": "node_15", "destPort": 0 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_15", "destPort": 1 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_15", "destPort": 2 },
+    { "sourceNode": "node_15", "sourcePort": 0, "destNode": "node_16", "destPort": 0 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_16", "destPort": 1 },
+    { "sourceNode": "node_16", "sourcePort": 0, "destNode": "node_17", "destPort": 0 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_17", "destPort": 1 },
+    { "sourceNode": "node_17", "sourcePort": 0, "destNode": "node_18", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_18", "destPort": 2 },
+    { "sourceNode": "node_18", "sourcePort": 0, "destNode": "node_19", "destPort": 0 }
   ]
 }

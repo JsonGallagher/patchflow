@@ -17,7 +17,8 @@ public:
         addInput  ("magnitudes", PortType::Buffer);
         addInput  ("texture_in", PortType::Texture);
         addOutput ("texture",    PortType::Texture);
-        addParam  ("fragmentShader", getDefaultFragmentShader());
+        addParam  ("fragmentShader", getDefaultFragmentShader(),
+                   {}, {}, "Fragment Shader", "GLSL fragment shader code");
     }
 
     juce::String getTypeId()      const override { return "ShaderVisual"; }

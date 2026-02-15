@@ -15,11 +15,13 @@ public:
         addInput  ("zoom",     PortType::Visual);
         addOutput ("texture",  PortType::Texture);
 
-        addParam ("segments", 6, 2, 24);
-        addParam ("rotationDeg", 0.0f, -180.0f, 180.0f);
-        addParam ("zoom", 1.0f, 0.1f, 4.0f);
-        addParam ("mirror", 1, 0, 1);
-        addParam ("wrap", 1, 0, 1);
+        addParam ("segments", 6, 2, 24, "Segments", "Number of kaleidoscope slices", "", "Kaleidoscope");
+        addParam ("rotationDeg", 0.0f, -180.0f, 180.0f, "Rotation", "Rotation angle", "deg", "Kaleidoscope");
+        addParam ("zoom", 1.0f, 0.1f, 4.0f, "Zoom", "Zoom factor", "x", "Kaleidoscope");
+        addParam ("mirror", 1, 0, 1, "Mirror", "Mirror alternate segments", "", "Options",
+                  juce::StringArray { "Off", "On" });
+        addParam ("wrap", 1, 0, 1, "Wrap", "Edge behavior", "", "Options",
+                  juce::StringArray { "Clamp", "Repeat" });
     }
 
     juce::String getTypeId()      const override { return "Kaleidoscope"; }

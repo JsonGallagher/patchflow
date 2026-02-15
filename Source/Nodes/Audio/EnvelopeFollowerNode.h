@@ -13,8 +13,8 @@ public:
         addInput  ("in_L",     PortType::Audio);
         addInput  ("in_R",     PortType::Audio);
         addOutput ("envelope", PortType::Signal);
-        addParam  ("attackMs",  10.0f,  1.0f, 500.0f);
-        addParam  ("releaseMs", 100.0f, 1.0f, 2000.0f);
+        addParam  ("attackMs",  10.0f,  1.0f, 500.0f, "Attack", "How fast the envelope rises", "ms", "Timing");
+        addParam  ("releaseMs", 100.0f, 1.0f, 2000.0f, "Release", "How fast the envelope falls", "ms", "Timing");
     }
 
     juce::String getTypeId()      const override { return "EnvelopeFollower"; }

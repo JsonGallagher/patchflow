@@ -23,6 +23,12 @@ struct NodeParam
     juce::var    defaultValue;
     juce::var    minValue;
     juce::var    maxValue;
+    // Rich metadata (display-only, does not affect serialization)
+    juce::String      displayName;   // e.g. "Attack Time" instead of "attackMs"
+    juce::String      description;   // Tooltip text
+    juce::String      suffix;        // Unit suffix: "ms", "Hz", "x", "px"
+    juce::String      group;         // Section header: "Timing", "Transform"
+    juce::StringArray enumLabels;    // For int params: {"Heat","Rainbow","Grayscale"}
 };
 
 class NodeBase
@@ -246,7 +252,19 @@ protected:
     void addParam (const juce::String& name, juce::var defaultVal,
                    juce::var minVal = {}, juce::var maxVal = {})
     {
-        params_.push_back ({ name, defaultVal, minVal, maxVal });
+        params_.push_back ({ name, defaultVal, minVal, maxVal, {}, {}, {}, {}, {} });
+    }
+
+    void addParam (const juce::String& name, juce::var defaultVal,
+                   juce::var minVal, juce::var maxVal,
+                   const juce::String& displayName,
+                   const juce::String& description = {},
+                   const juce::String& suffix = {},
+                   const juce::String& group = {},
+                   juce::StringArray enumLabels = {})
+    {
+        params_.push_back ({ name, defaultVal, minVal, maxVal,
+                             displayName, description, suffix, group, std::move (enumLabels) });
     }
 
     void resizeAudioBuffer (int outputLocalIndex, int numSamples)

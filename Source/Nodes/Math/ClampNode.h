@@ -11,8 +11,8 @@ public:
     {
         addInput  ("in",  PortType::Signal);
         addOutput ("out", PortType::Signal);
-        addParam  ("min", 0.0f);
-        addParam  ("max", 1.0f);
+        addParam  ("min", 0.0f, {}, {}, "Min", "Minimum output value");
+        addParam  ("max", 1.0f, {}, {}, "Max", "Maximum output value");
     }
 
     juce::String getTypeId()      const override { return "Clamp"; }

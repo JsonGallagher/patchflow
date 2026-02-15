@@ -11,7 +11,7 @@ public:
     {
         addInput  ("in",  PortType::Signal);
         addOutput ("out", PortType::Signal);
-        addParam  ("smoothing", 0.9f, 0.0f, 0.999f);
+        addParam  ("smoothing", 0.9f, 0.0f, 0.999f, "Smoothing", "Lag factor (higher = smoother)");
     }
 
     juce::String getTypeId()      const override { return "Smoothing"; }

@@ -11,10 +11,10 @@ public:
     {
         addInput  ("in",  PortType::Signal);
         addOutput ("out", PortType::Signal);
-        addParam  ("inMin",  0.0f);
-        addParam  ("inMax",  1.0f);
-        addParam  ("outMin", 0.0f);
-        addParam  ("outMax", 1.0f);
+        addParam  ("inMin",  0.0f, {}, {}, "In Min",  "Input range minimum",  "", "Input Range");
+        addParam  ("inMax",  1.0f, {}, {}, "In Max",  "Input range maximum",  "", "Input Range");
+        addParam  ("outMin", 0.0f, {}, {}, "Out Min", "Output range minimum", "", "Output Range");
+        addParam  ("outMax", 1.0f, {}, {}, "Out Max", "Output range maximum", "", "Output Range");
     }
 
     juce::String getTypeId()      const override { return "MapRange"; }

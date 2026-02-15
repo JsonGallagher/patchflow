@@ -12,7 +12,7 @@ public:
         addInput  ("in",   PortType::Audio);
         addInput  ("gain", PortType::Signal);
         addOutput ("out",  PortType::Audio);
-        addParam  ("gain", 1.0f, 0.0f, 2.0f);
+        addParam  ("gain", 1.0f, 0.0f, 2.0f, "Gain", "Output gain multiplier", "x");
     }
 
     juce::String getTypeId()      const override { return "Gain"; }

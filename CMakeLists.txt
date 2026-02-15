@@ -52,6 +52,12 @@ target_sources(PatchFlow PRIVATE
     Source/Nodes/Audio/BandSplitterNode.cpp
     Source/Nodes/Audio/SmoothingNode.h
     Source/Nodes/Audio/SmoothingNode.cpp
+    Source/Nodes/Audio/BeatDetectorNode.h
+    Source/Nodes/Audio/BeatDetectorNode.cpp
+    Source/Nodes/Audio/SpectralFeaturesNode.h
+    Source/Nodes/Audio/SpectralFeaturesNode.cpp
+    Source/Nodes/Audio/ChromagramNode.h
+    Source/Nodes/Audio/ChromagramNode.cpp
     Source/Nodes/Math/AddNode.h
     Source/Nodes/Math/AddNode.cpp
     Source/Nodes/Math/MultiplyNode.h
@@ -82,6 +88,40 @@ target_sources(PatchFlow PRIVATE
     Source/Nodes/Visual/ShaderVisualNode.cpp
     Source/Nodes/Visual/OutputCanvasNode.h
     Source/Nodes/Visual/OutputCanvasNode.cpp
+    Source/Nodes/Visual/NoiseNode.h
+    Source/Nodes/Visual/NoiseNode.cpp
+    Source/Nodes/Visual/SDFShapeNode.h
+    Source/Nodes/Visual/SDFShapeNode.cpp
+    Source/Nodes/Visual/GradientNode.h
+    Source/Nodes/Visual/GradientNode.cpp
+    Source/Nodes/Visual/PatternNode.h
+    Source/Nodes/Visual/PatternNode.cpp
+    Source/Nodes/Visual/BlurNode.h
+    Source/Nodes/Visual/BlurNode.cpp
+    Source/Nodes/Visual/MirrorNode.h
+    Source/Nodes/Visual/MirrorNode.cpp
+    Source/Nodes/Visual/TileNode.h
+    Source/Nodes/Visual/TileNode.cpp
+    Source/Nodes/Visual/EdgeDetectNode.h
+    Source/Nodes/Visual/EdgeDetectNode.cpp
+    Source/Nodes/Visual/ChromaticAberrationNode.h
+    Source/Nodes/Visual/ChromaticAberrationNode.cpp
+    Source/Nodes/Visual/ColorGradeNode.h
+    Source/Nodes/Visual/ColorGradeNode.cpp
+    Source/Nodes/Visual/GlitchNode.h
+    Source/Nodes/Visual/GlitchNode.cpp
+    Source/Nodes/Visual/LFONode.h
+    Source/Nodes/Visual/LFONode.cpp
+    Source/Nodes/Visual/TriggerNode.h
+    Source/Nodes/Visual/TriggerNode.cpp
+    Source/Nodes/Visual/StepSequencerNode.h
+    Source/Nodes/Visual/StepSequencerNode.cpp
+    Source/Nodes/Visual/ReactionDiffusionNode.h
+    Source/Nodes/Visual/ReactionDiffusionNode.cpp
+    Source/Nodes/Visual/ParticleNode.h
+    Source/Nodes/Visual/ParticleNode.cpp
+    Source/Nodes/Visual/TextureInputNode.h
+    Source/Nodes/Visual/TextureInputNode.cpp
 
     # Audio
     Source/Audio/AudioEngine.h
@@ -99,12 +139,16 @@ target_sources(PatchFlow PRIVATE
     Source/UI/CableComponent.cpp
     Source/UI/NodePaletteComponent.h
     Source/UI/NodePaletteComponent.cpp
+    Source/UI/Theme.h
     Source/UI/InspectorPanel.h
     Source/UI/InspectorPanel.cpp
 
     # Rendering
     Source/Rendering/VisualCanvas.h
     Source/Rendering/VisualCanvas.cpp
+    Source/Rendering/ShaderUtils.h
+    Source/Rendering/ShaderUtils.cpp
+    Source/Rendering/RenderConfig.h
 )
 
 target_compile_definitions(PatchFlow PRIVATE

@@ -16,11 +16,12 @@ public:
         addInput  ("scale",   PortType::Visual);
         addOutput ("texture", PortType::Texture);
 
-        addParam ("tx", 0.0f, -1.0f, 1.0f);
-        addParam ("ty", 0.0f, -1.0f, 1.0f);
-        addParam ("rotationDeg", 0.0f, -180.0f, 180.0f);
-        addParam ("scale", 1.0f, 0.1f, 4.0f);
-        addParam ("wrap", 0, 0, 1); // 0=clamp with black outside, 1=repeat
+        addParam ("tx", 0.0f, -1.0f, 1.0f, "Translate X", "Horizontal offset", "", "Transform");
+        addParam ("ty", 0.0f, -1.0f, 1.0f, "Translate Y", "Vertical offset", "", "Transform");
+        addParam ("rotationDeg", 0.0f, -180.0f, 180.0f, "Rotation", "Rotation angle", "deg", "Transform");
+        addParam ("scale", 1.0f, 0.1f, 4.0f, "Scale", "Zoom factor", "x", "Transform");
+        addParam ("wrap", 0, 0, 1, "Wrap Mode", "Edge behavior", "", "Edge",
+                  juce::StringArray { "Clamp", "Repeat" });
     }
 
     juce::String getTypeId()      const override { return "Transform"; }

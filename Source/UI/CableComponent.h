@@ -6,7 +6,8 @@
 namespace pf
 {
 
-class CableComponent : public juce::Component
+class CableComponent : public juce::Component,
+                        private juce::Timer
 {
 public:
     CableComponent (const Connection& connection, PortType type);
@@ -19,10 +20,13 @@ public:
     const Connection& getConnection() const { return connection_; }
 
 private:
+    void timerCallback() override;
+
     Connection connection_;
     PortType type_;
     juce::Point<float> startPoint_, endPoint_;
     juce::Path cablePath_;
+    float flowPhase_ = 0.f;
 
     void updatePath();
 };

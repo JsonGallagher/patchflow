@@ -15,8 +15,9 @@ public:
         addInput  ("color_b",   PortType::Visual);
         addInput  ("thickness", PortType::Visual);
         addOutput ("texture",   PortType::Texture);
-        addParam  ("lineThickness", 2.0f, 1.0f, 5.0f);
-        addParam  ("style", 0, 0, 2); // 0=line, 1=filled, 2=mirrored
+        addParam  ("lineThickness", 2.0f, 1.0f, 5.0f, "Thickness", "Waveform line weight", "px", "Style");
+        addParam  ("style", 0, 0, 2, "Style", "Waveform visualization style", "", "Style",
+                   juce::StringArray { "Line", "Filled", "Mirrored" });
     }
 
     juce::String getTypeId()      const override { return "WaveformRenderer"; }

@@ -15,10 +15,10 @@ public:
         addOutput ("mid",        PortType::Signal);
         addOutput ("high",       PortType::Signal);
         addOutput ("presence",   PortType::Signal);
-        addParam  ("crossover1", 60.0f,    20.0f, 200.0f);
-        addParam  ("crossover2", 250.0f,   100.0f, 1000.0f);
-        addParam  ("crossover3", 2000.0f,  500.0f, 5000.0f);
-        addParam  ("crossover4", 6000.0f,  2000.0f, 12000.0f);
+        addParam  ("crossover1", 60.0f,    20.0f, 200.0f,   "Sub/Low",       "Sub to low crossover frequency", "Hz", "Crossovers");
+        addParam  ("crossover2", 250.0f,   100.0f, 1000.0f,  "Low/Mid",       "Low to mid crossover frequency", "Hz", "Crossovers");
+        addParam  ("crossover3", 2000.0f,  500.0f, 5000.0f,  "Mid/High",      "Mid to high crossover frequency", "Hz", "Crossovers");
+        addParam  ("crossover4", 6000.0f,  2000.0f, 12000.0f, "High/Presence", "High to presence crossover frequency", "Hz", "Crossovers");
     }
 
     juce::String getTypeId()      const override { return "BandSplitter"; }

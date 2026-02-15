@@ -15,7 +15,8 @@ public:
         addOutput ("g", PortType::Visual);
         addOutput ("b", PortType::Visual);
         addOutput ("a", PortType::Visual);
-        addParam  ("palette", 0, 0, 3); // 0=heat, 1=rainbow, 2=grayscale, 3=cool
+        addParam  ("palette", 0, 0, 3, "Palette", "Color mapping style", "", "",
+                   juce::StringArray { "Heat", "Rainbow", "Grayscale", "Cool" });
     }
 
     juce::String getTypeId()      const override { return "ColorMap"; }

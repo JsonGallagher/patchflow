@@ -15,13 +15,14 @@ public:
         addInput  ("offset_y", PortType::Visual);
         addOutput ("texture", PortType::Texture);
 
-        addParam ("feedback", 0.82f, 0.0f, 0.99f);
-        addParam ("mix", 1.0f, 0.0f, 1.0f);
-        addParam ("offsetX", 0.002f, -0.25f, 0.25f);
-        addParam ("offsetY", 0.001f, -0.25f, 0.25f);
-        addParam ("zoom", 1.0f, 0.8f, 1.2f);
-        addParam ("rotationDeg", 0.0f, -45.0f, 45.0f);
-        addParam ("wrap", 1, 0, 1); // 0=black outside, 1=repeat
+        addParam ("feedback", 0.82f, 0.0f, 0.99f, "Decay", "How much previous frame persists", "", "Feedback");
+        addParam ("mix", 1.0f, 0.0f, 1.0f, "Mix", "Blend with input", "", "Feedback");
+        addParam ("offsetX", 0.002f, -0.25f, 0.25f, "Offset X", "Horizontal drift per frame", "", "Motion");
+        addParam ("offsetY", 0.001f, -0.25f, 0.25f, "Offset Y", "Vertical drift per frame", "", "Motion");
+        addParam ("zoom", 1.0f, 0.8f, 1.2f, "Zoom", "Scale per frame", "x", "Motion");
+        addParam ("rotationDeg", 0.0f, -45.0f, 45.0f, "Rotation", "Rotation per frame", "deg", "Motion");
+        addParam ("wrap", 1, 0, 1, "Wrap", "Edge behavior", "", "Edge",
+                  juce::StringArray { "Clamp", "Repeat" });
     }
 
     juce::String getTypeId()      const override { return "Feedback"; }

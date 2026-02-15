@@ -1,239 +1,39 @@
 {
   "nodes": [
-    {
-      "id": "node_1",
-      "typeId": "AudioInput",
-      "x": 80,
-      "y": 280,
-      "params": {}
-    },
-    {
-      "id": "node_2",
-      "typeId": "FFTAnalyzer",
-      "x": 300,
-      "y": 200,
-      "params": {
-        "fftOrder": 11,
-        "windowType": 0
-      }
-    },
-    {
-      "id": "node_3",
-      "typeId": "BandSplitter",
-      "x": 520,
-      "y": 200,
-      "params": {
-        "crossover1": 60.0,
-        "crossover2": 250.0,
-        "crossover3": 2000.0,
-        "crossover4": 6000.0
-      }
-    },
-    {
-      "id": "node_4",
-      "typeId": "Smoothing",
-      "x": 740,
-      "y": 120,
-      "params": {
-        "smoothing": 0.9
-      }
-    },
-    {
-      "id": "node_5",
-      "typeId": "Smoothing",
-      "x": 740,
-      "y": 260,
-      "params": {
-        "smoothing": 0.86
-      }
-    },
-    {
-      "id": "node_6",
-      "typeId": "MapRange",
-      "x": 960,
-      "y": 120,
-      "params": {
-        "inMin": 0.0,
-        "inMax": 0.2,
-        "outMin": 0.2,
-        "outMax": 1.0
-      }
-    },
-    {
-      "id": "node_7",
-      "typeId": "MapRange",
-      "x": 960,
-      "y": 260,
-      "params": {
-        "inMin": 0.0,
-        "inMax": 0.2,
-        "outMin": 0.45,
-        "outMax": 1.2
-      }
-    },
-    {
-      "id": "node_8",
-      "typeId": "ShaderVisual",
-      "x": 1180,
-      "y": 220,
-      "params": {}
-    },
-    {
-      "id": "node_9",
-      "typeId": "Kaleidoscope",
-      "x": 1400,
-      "y": 220,
-      "params": {
-        "segments": 8,
-        "rotationDeg": 12.0,
-        "zoom": 1.0,
-        "mirror": 1,
-        "wrap": 1
-      }
-    },
-    {
-      "id": "node_10",
-      "typeId": "Bloom",
-      "x": 1620,
-      "y": 220,
-      "params": {
-        "threshold": 0.52,
-        "intensity": 1.2,
-        "radius": 2.2
-      }
-    },
-    {
-      "id": "node_11",
-      "typeId": "OutputCanvas",
-      "x": 1840,
-      "y": 220,
-      "params": {
-        "bgR": 0.0,
-        "bgG": 0.0,
-        "bgB": 0.0
-      }
-    }
+    { "id": "node_1", "typeId": "AudioInput", "x": 80, "y": 300, "params": {} },
+    { "id": "node_2", "typeId": "FFTAnalyzer", "x": 280, "y": 200, "params": { "fftOrder": 11, "windowType": 0 } },
+    { "id": "node_3", "typeId": "SpectralFeatures", "x": 480, "y": 200, "params": { "rolloffPercent": 0.85, "smoothing": 0.8 } },
+    { "id": "node_4", "typeId": "Smoothing", "x": 680, "y": 100, "params": { "smoothing": 0.9 } },
+    { "id": "node_5", "typeId": "Smoothing", "x": 680, "y": 280, "params": { "smoothing": 0.85 } },
+    { "id": "node_6", "typeId": "LFO", "x": 680, "y": 460, "params": { "waveform": 2, "frequency": 0.12, "amplitude": 0.9, "offset": 0.5, "phase": 0.0 } },
+    { "id": "node_7", "typeId": "Pattern", "x": 920, "y": 200, "params": {
+        "patternType": 5, "frequency": 16.0, "rotation": 0.0, "thickness": 0.4, "speed": 0.5, "softness": 0.03
+    } },
+    { "id": "node_8", "typeId": "Kaleidoscope", "x": 1140, "y": 200, "params": { "segments": 12, "rotationDeg": 0.0, "zoom": 1.1, "mirror": 1, "wrap": 1 } },
+    { "id": "node_9", "typeId": "Bloom", "x": 1360, "y": 200, "params": { "threshold": 0.3, "intensity": 1.5, "radius": 2.5 } },
+    { "id": "node_10", "typeId": "Tile", "x": 1580, "y": 200, "params": {
+        "countX": 2, "countY": 2, "offsetX": 0.0, "offsetY": 0.0, "rotation": 0.0, "mirror": 1
+    } },
+    { "id": "node_11", "typeId": "Feedback", "x": 1800, "y": 200, "params": {
+        "feedback": 0.85, "mix": 1.0, "offsetX": 0.001, "offsetY": 0.0, "zoom": 1.005, "rotationDeg": 0.3, "wrap": 1
+    } },
+    { "id": "node_12", "typeId": "OutputCanvas", "x": 2020, "y": 200, "params": { "bgR": 0.0, "bgG": 0.0, "bgB": 0.0 } }
   ],
   "connections": [
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 0,
-      "destNode": "node_2",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_1",
-      "sourcePort": 1,
-      "destNode": "node_2",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_3",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 2,
-      "destNode": "node_4",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 3,
-      "destNode": "node_5",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_6",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_7",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_3",
-      "sourcePort": 1,
-      "destNode": "node_8",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_2",
-      "sourcePort": 0,
-      "destNode": "node_8",
-      "destPort": 4
-    },
-    {
-      "sourceNode": "node_8",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_6",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 1
-    },
-    {
-      "sourceNode": "node_4",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_7",
-      "sourcePort": 0,
-      "destNode": "node_9",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_9",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 0
-    },
-    {
-      "sourceNode": "node_5",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 2
-    },
-    {
-      "sourceNode": "node_7",
-      "sourcePort": 0,
-      "destNode": "node_10",
-      "destPort": 3
-    },
-    {
-      "sourceNode": "node_10",
-      "sourcePort": 0,
-      "destNode": "node_11",
-      "destPort": 0
-    }
+    { "sourceNode": "node_1", "sourcePort": 0, "destNode": "node_2", "destPort": 0 },
+    { "sourceNode": "node_1", "sourcePort": 1, "destNode": "node_2", "destPort": 1 },
+    { "sourceNode": "node_2", "sourcePort": 0, "destNode": "node_3", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 0, "destNode": "node_4", "destPort": 0 },
+    { "sourceNode": "node_3", "sourcePort": 1, "destNode": "node_5", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_7", "destPort": 0 },
+    { "sourceNode": "node_7", "sourcePort": 0, "destNode": "node_8", "destPort": 0 },
+    { "sourceNode": "node_6", "sourcePort": 0, "destNode": "node_8", "destPort": 2 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_8", "destPort": 3 },
+    { "sourceNode": "node_8", "sourcePort": 0, "destNode": "node_9", "destPort": 0 },
+    { "sourceNode": "node_5", "sourcePort": 0, "destNode": "node_9", "destPort": 2 },
+    { "sourceNode": "node_9", "sourcePort": 0, "destNode": "node_10", "destPort": 0 },
+    { "sourceNode": "node_10", "sourcePort": 0, "destNode": "node_11", "destPort": 0 },
+    { "sourceNode": "node_4", "sourcePort": 0, "destNode": "node_11", "destPort": 1 },
+    { "sourceNode": "node_11", "sourcePort": 0, "destNode": "node_12", "destPort": 0 }
   ]
 }

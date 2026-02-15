@@ -15,6 +15,7 @@ class NodeComponent : public juce::Component
 public:
     NodeComponent (NodeEditorComponent& editor, const juce::String& nodeId,
                    const juce::String& typeId, const juce::String& displayName,
+                   const juce::String& category,
                    const std::vector<Port>& inputs, const std::vector<Port>& outputs);
 
     void paint (juce::Graphics& g) override;
@@ -36,7 +37,7 @@ public:
 
     static constexpr int kHeaderHeight = 26;
     static constexpr int kPortRowHeight = 20;
-    static constexpr int kMinWidth = 140;
+    static constexpr int kMinWidth = 150;
     static constexpr int kPortPadding = 6;
 
 private:
@@ -44,6 +45,7 @@ private:
     juce::String nodeId_;
     juce::String typeId_;
     juce::String displayName_;
+    juce::String category_;
     bool selected_ = false;
 
     std::vector<std::unique_ptr<PortComponent>> inputPorts_;

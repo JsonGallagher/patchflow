@@ -18,8 +18,10 @@ public:
         addInput  ("in_R",       PortType::Audio);
         addOutput ("magnitudes", PortType::Buffer);
         addOutput ("energy",     PortType::Signal);
-        addParam  ("fftOrder",   11, 9, 13);
-        addParam  ("windowType", 0, 0, 2); // 0=Hann, 1=Hamming, 2=Blackman
+        addParam  ("fftOrder",   11, 9, 13, "FFT Size", "Frequency resolution (2^N samples)", "",
+                   "", juce::StringArray { "512", "1024", "2048", "4096", "8192" });
+        addParam  ("windowType", 0, 0, 2, "Window", "Windowing function applied before FFT", "",
+                   "", juce::StringArray { "Hann", "Hamming", "Blackman" });
     }
 
     juce::String getTypeId()      const override { return "FFTAnalyzer"; }
