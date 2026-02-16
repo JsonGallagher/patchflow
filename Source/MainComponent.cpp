@@ -1,6 +1,8 @@
 #include "MainComponent.h"
 #include "UI/Theme.h"
 #include <algorithm>
+#include <cmath>
+#include <unordered_set>
 
 namespace pf
 {
@@ -8,6 +10,133 @@ namespace pf
 namespace
 {
 constexpr int kMenuBarHeight = 24;
+constexpr int kMenuActionReloadFactoryFromSourceTree = 8;
+constexpr auto kPresetManifestFileName = ".preset_manifest.json";
+
+bool hasPresetJson (const juce::File& dir)
+{
+    return dir.isDirectory() && dir.findChildFiles (juce::File::findFiles, false, "*.json").size() > 0;
+}
+
+void appendUniqueCandidate (std::vector<juce::File>& candidates, const juce::File& candidate)
+{
+    if (candidate == juce::File {})
+        return;
+
+    if (std::find (candidates.begin(), candidates.end(), candidate) == candidates.end())
+        candidates.push_back (candidate);
+}
+
+void addWalkUpCandidates (std::vector<juce::File>& candidates, juce::File startDir)
+{
+    auto dir = startDir;
+    for (int depth = 0; depth < 8; ++depth)
+    {
+        appendUniqueCandidate (candidates, dir.getChildFile ("Resources/ExamplePatches"));
+
+        auto parent = dir.getParentDirectory();
+        if (parent == dir || parent == juce::File {})
+            break;
+
+        dir = parent;
+    }
+}
+
+juce::File firstValidPresetDirectory (const std::vector<juce::File>& candidates)
+{
+    for (const auto& candidate : candidates)
+        if (hasPresetJson (candidate))
+            return candidate;
+
+    return {};
+}
+
+juce::String readPresetManifestVersion (const juce::File& presetDir)
+{
+    auto manifestFile = presetDir.getChildFile (kPresetManifestFileName);
+    if (! manifestFile.existsAsFile())
+        return {};
+
+    auto parsed = juce::JSON::parse (manifestFile.loadFileAsString());
+    auto* root = parsed.getDynamicObject();
+    if (root == nullptr)
+        return {};
+
+    auto version = root->getProperty ("version").toString().trim();
+    return version.isNotEmpty() ? version : juce::String {};
+}
+
+#if JUCE_DEBUG
+juce::String validateFactoryPresetFile (const juce::File& presetFile,
+                                        const std::unordered_set<std::string>& knownTypeIds)
+{
+    auto parsed = juce::JSON::parse (presetFile.loadFileAsString());
+    if (! parsed.isObject())
+        return "JSON parse failed";
+
+    auto* root = parsed.getDynamicObject();
+    if (root == nullptr)
+        return "Preset root is not an object";
+
+    auto* nodes = root->getProperty ("nodes").getArray();
+    if (nodes == nullptr)
+        return "Missing nodes array";
+
+    auto* connections = root->getProperty ("connections").getArray();
+    if (connections == nullptr)
+        return "Missing connections array";
+
+    juce::StringArray outputCanvasIds;
+    outputCanvasIds.ensureStorageAllocated (nodes->size());
+
+    for (const auto& nodeVar : *nodes)
+    {
+        auto* nodeObj = nodeVar.getDynamicObject();
+        if (nodeObj == nullptr)
+            return "Node entry is not an object";
+
+        auto nodeId = nodeObj->getProperty ("id").toString();
+        auto typeId = nodeObj->getProperty ("typeId").toString();
+
+        if (nodeId.isEmpty())
+            return "Node entry missing id";
+        if (typeId.isEmpty())
+            return "Node \"" + nodeId + "\" missing typeId";
+
+        if (knownTypeIds.find (typeId.toStdString()) == knownTypeIds.end())
+            return "Unknown node typeId \"" + typeId + "\"";
+
+        if (typeId == "OutputCanvas")
+            outputCanvasIds.addIfNotAlreadyThere (nodeId);
+    }
+
+    if (outputCanvasIds.isEmpty())
+        return "No OutputCanvas node";
+
+    bool hasCanvasTextureConnection = false;
+    for (const auto& connVar : *connections)
+    {
+        auto* connObj = connVar.getDynamicObject();
+        if (connObj == nullptr)
+            return "Connection entry is not an object";
+
+        auto destNode = connObj->getProperty ("destNode").toString();
+        auto destPortVar = connObj->getProperty ("destPort");
+        auto destPort = destPortVar.isVoid() ? -1 : static_cast<int> (destPortVar);
+
+        if (destPort == 0 && outputCanvasIds.contains (destNode))
+        {
+            hasCanvasTextureConnection = true;
+            break;
+        }
+    }
+
+    if (! hasCanvasTextureConnection)
+        return "No connection into OutputCanvas.texture";
+
+    return {};
+}
+#endif
 
 enum PresetActionIds
 {
@@ -78,7 +207,9 @@ MainComponent::MainComponent()
 
     // Audio setup
     audioEngine_.initialise();
-    graphCompiler_.setSampleRateAndBlockSize (44100.0, 512);
+    cachedAudioSampleRate_ = audioEngine_.getSampleRate();
+    cachedAudioBlockSize_ = audioEngine_.getBlockSize();
+    graphCompiler_.setSampleRateAndBlockSize (cachedAudioSampleRate_, cachedAudioBlockSize_);
 
     // Wire up analysis FIFO to visual canvas
     visualCanvas_.setAnalysisFIFO (&audioEngine_.getAnalysisFIFO());
@@ -156,6 +287,9 @@ juce::PopupMenu MainComponent::getMenuForIndex (int menuIndex, const juce::Strin
         menu.addItem (3, "Save...", true, false);
         menu.addSeparator();
         menu.addItem (5, "Refresh Presets");
+#if JUCE_DEBUG
+        menu.addItem (kMenuActionReloadFactoryFromSourceTree, "Reload Factory Presets From Source Tree");
+#endif
         menu.addItem (6, "Save As Preset...");
         menu.addItem (7, "Update Selected Preset", selectedPresetFile_ != juce::File {});
         menu.addSeparator();
@@ -182,6 +316,9 @@ void MainComponent::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         case 2:  loadFromFile(); break;
         case 3:  saveToFile(); break;
         case 5:  refreshPresets (true); break;
+#if JUCE_DEBUG
+        case kMenuActionReloadFactoryFromSourceTree: reloadFactoryPresetsFromSourceTree(); break;
+#endif
         case 6:  saveCurrentAsPreset(); break;
         case 7:  updateSelectedPreset(); break;
         case 4:  showAudioSettings(); break;
@@ -195,6 +332,19 @@ void MainComponent::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
 //==============================================================================
 void MainComponent::timerCallback()
 {
+    const auto sampleRate = audioEngine_.getSampleRate();
+    const auto blockSize = audioEngine_.getBlockSize();
+    const auto sampleRateChanged = std::abs (sampleRate - cachedAudioSampleRate_) > 0.01;
+    const auto blockSizeChanged = blockSize != cachedAudioBlockSize_;
+
+    if (sampleRateChanged || blockSizeChanged)
+    {
+        cachedAudioSampleRate_ = sampleRate;
+        cachedAudioBlockSize_ = blockSize;
+        graphCompiler_.setSampleRateAndBlockSize (sampleRate, blockSize);
+        graphCompiler_.compile();
+    }
+
     // Push compiled graph to audio engine and visual canvas
     auto* graph = graphCompiler_.getLatestGraph();
     if (graph)
@@ -263,12 +413,48 @@ void MainComponent::showAudioSettings()
 void MainComponent::refreshPresets (bool preserveSelection)
 {
     const auto previousSelection = preserveSelection ? selectedPresetFile_ : juce::File {};
+    presetRefreshWarning_.clear();
+    resolvedFactoryPresetDir_ = resolveFactoryPresetDirectory();
 
     isRefreshingPresets_ = true;
     presetComboBox_.clear (juce::dontSendNotification);
     presetEntries_.clear();
 
+#if JUCE_DEBUG
+    std::unordered_set<std::string> knownTypeIds;
+    for (const auto& nodeInfo : NodeRegistry::instance().getAllNodeTypes())
+        knownTypeIds.insert (nodeInfo.typeId.toStdString());
+
+    int invalidFactoryPresetCount = 0;
+
+    auto sourceFactoryDir = resolveSourceFactoryPresetDirectory();
+    auto bundledFactoryDir = resolveBundledFactoryPresetDirectory();
+    if (hasPresetJson (sourceFactoryDir) && hasPresetJson (bundledFactoryDir) && sourceFactoryDir != bundledFactoryDir)
+    {
+        const auto sourceVersion = readPresetManifestVersion (sourceFactoryDir);
+        const auto bundleVersion = readPresetManifestVersion (bundledFactoryDir);
+
+        if (sourceVersion.isNotEmpty() && bundleVersion.isNotEmpty() && sourceVersion != bundleVersion)
+        {
+            const auto warning = "Factory bundle/source mismatch: src " + sourceVersion + ", bundle " + bundleVersion;
+            appendPresetRefreshWarning (warning);
+
+            if (! hasLoggedManifestMismatch_)
+            {
+                DBG ("PatchFlow: " + warning
+                     + "\n  source: " + sourceFactoryDir.getFullPathName()
+                     + "\n  bundle: " + bundledFactoryDir.getFullPathName());
+                hasLoggedManifestMismatch_ = true;
+            }
+        }
+    }
+#endif
+
+#if JUCE_DEBUG
+    auto appendPresetsFrom = [this, &knownTypeIds, &invalidFactoryPresetCount] (const juce::File& directory, bool isFactory)
+#else
     auto appendPresetsFrom = [this] (const juce::File& directory, bool isFactory)
+#endif
     {
         if (! directory.isDirectory())
             return;
@@ -285,15 +471,32 @@ void MainComponent::refreshPresets (bool preserveSelection)
 
         for (const auto& file : files)
         {
+#if JUCE_DEBUG
+            if (isFactory)
+            {
+                auto validationError = validateFactoryPresetFile (file, knownTypeIds);
+                if (validationError.isNotEmpty())
+                {
+                    ++invalidFactoryPresetCount;
+                    DBG ("PatchFlow: preset validation failed for \""
+                         + file.getFullPathName() + "\": " + validationError);
+                }
+            }
+#endif
             presetEntries_.push_back ({ file.getFileNameWithoutExtension(), file, isFactory });
         }
     };
 
-    appendPresetsFrom (resolveFactoryPresetDirectory(), true);
+    appendPresetsFrom (resolvedFactoryPresetDir_, true);
 
     auto userPresetDir = getUserPresetDirectory();
     userPresetDir.createDirectory();
     appendPresetsFrom (userPresetDir, false);
+
+#if JUCE_DEBUG
+    if (invalidFactoryPresetCount > 0)
+        appendPresetRefreshWarning ("Factory preset issues detected: " + juce::String (invalidFactoryPresetCount));
+#endif
 
     int selectedId = 0;
     for (size_t i = 0; i < presetEntries_.size(); ++i)
@@ -319,6 +522,39 @@ void MainComponent::refreshPresets (bool preserveSelection)
 
     isRefreshingPresets_ = false;
     updatePresetStatusLabel();
+}
+
+void MainComponent::appendPresetRefreshWarning (const juce::String& warning)
+{
+    const auto trimmed = warning.trim();
+    if (trimmed.isEmpty())
+        return;
+
+    if (presetRefreshWarning_.isEmpty())
+    {
+        presetRefreshWarning_ = trimmed;
+        return;
+    }
+
+    if (! presetRefreshWarning_.contains (trimmed))
+        presetRefreshWarning_ += " | " + trimmed;
+}
+
+void MainComponent::reloadFactoryPresetsFromSourceTree()
+{
+#if JUCE_DEBUG
+    auto sourceDir = resolveSourceFactoryPresetDirectory();
+    if (sourceDir == juce::File {})
+    {
+        juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::WarningIcon,
+                                                "Factory Presets Not Found",
+                                                "Could not find Resources/ExamplePatches in the source tree.");
+        return;
+    }
+
+    factoryPresetOverrideDir_ = sourceDir;
+    refreshPresets (true);
+#endif
 }
 
 void MainComponent::loadPresetFile (const juce::File& file)
@@ -506,17 +742,23 @@ void MainComponent::updatePresetStatusLabel()
 {
     if (selectedPresetFile_ == juce::File {})
     {
+        juce::String statusText;
         if (presetEntries_.empty())
-            presetStatusLabel_.setText ("No presets found", juce::dontSendNotification);
+            statusText = "No presets found";
         else
-            presetStatusLabel_.setText ("No preset loaded", juce::dontSendNotification);
+            statusText = "No preset loaded";
 
-        presetStatusLabel_.setTooltip ({});
+        if (presetRefreshWarning_.isNotEmpty())
+            statusText += " | " + presetRefreshWarning_;
+
+        presetStatusLabel_.setText (statusText, juce::dontSendNotification);
+
+        presetStatusLabel_.setTooltip (presetRefreshWarning_.isNotEmpty() ? presetRefreshWarning_ : juce::String {});
         return;
     }
 
     const auto userDir = getUserPresetDirectory();
-    const auto factoryDir = resolveFactoryPresetDirectory();
+    const auto factoryDir = resolvedFactoryPresetDir_;
 
     juce::String origin = "External";
     if (selectedPresetFile_.isAChildOf (userDir))
@@ -524,50 +766,56 @@ void MainComponent::updatePresetStatusLabel()
     else if (factoryDir != juce::File {} && selectedPresetFile_.isAChildOf (factoryDir))
         origin = "Factory";
 
-    presetStatusLabel_.setText (origin + ": " + selectedPresetFile_.getFileNameWithoutExtension(),
-                                juce::dontSendNotification);
-    presetStatusLabel_.setTooltip (selectedPresetFile_.getFullPathName());
+    auto statusText = origin + ": " + selectedPresetFile_.getFileNameWithoutExtension();
+    if (presetRefreshWarning_.isNotEmpty())
+        statusText += " | " + presetRefreshWarning_;
+
+    auto tooltip = selectedPresetFile_.getFullPathName();
+    if (origin == "Factory" && factoryDir != juce::File {})
+        tooltip << "\nFactory dir: " << factoryDir.getFullPathName();
+    if (presetRefreshWarning_.isNotEmpty())
+        tooltip << "\nWarning: " << presetRefreshWarning_;
+
+    presetStatusLabel_.setText (statusText, juce::dontSendNotification);
+    presetStatusLabel_.setTooltip (tooltip);
 }
 
 juce::File MainComponent::resolveFactoryPresetDirectory() const
 {
-    const auto hasPresetJson = [] (const juce::File& dir)
-    {
-        return dir.isDirectory() && dir.findChildFiles (juce::File::findFiles, false, "*.json").size() > 0;
-    };
+    auto bundledDir = resolveBundledFactoryPresetDirectory();
+    auto sourceDir = resolveSourceFactoryPresetDirectory();
 
-    std::vector<juce::File> candidates;
+#if JUCE_DEBUG
+    if (hasPresetJson (factoryPresetOverrideDir_))
+        return factoryPresetOverrideDir_;
+
+    std::vector<juce::File> candidates { sourceDir, bundledDir };
+#else
+    std::vector<juce::File> candidates { bundledDir, sourceDir };
+#endif
+    return firstValidPresetDirectory (candidates);
+}
+
+juce::File MainComponent::resolveSourceFactoryPresetDirectory() const
+{
+    std::vector<juce::File> sourceCandidates;
+    appendUniqueCandidate (sourceCandidates,
+                           juce::File::getCurrentWorkingDirectory().getChildFile ("Resources/ExamplePatches"));
+    addWalkUpCandidates (sourceCandidates, juce::File::getCurrentWorkingDirectory());
 
     const auto appFile = juce::File::getSpecialLocation (juce::File::currentApplicationFile);
-    const auto executableDir = appFile.getParentDirectory();       // .../Contents/MacOS
-    const auto contentsDir = executableDir.getParentDirectory();   // .../Contents
+    const auto executableDir = appFile.getParentDirectory();
+    addWalkUpCandidates (sourceCandidates, executableDir);
 
-    candidates.push_back (contentsDir.getChildFile ("Resources/ExamplePatches")); // bundled resources
-    candidates.push_back (juce::File::getCurrentWorkingDirectory().getChildFile ("Resources/ExamplePatches"));
+    return firstValidPresetDirectory (sourceCandidates);
+}
 
-    const auto addWalkUpCandidates = [&] (juce::File startDir)
-    {
-        auto dir = startDir;
-        for (int depth = 0; depth < 8; ++depth)
-        {
-            candidates.push_back (dir.getChildFile ("Resources/ExamplePatches"));
-
-            auto parent = dir.getParentDirectory();
-            if (parent == dir || parent == juce::File {})
-                break;
-
-            dir = parent;
-        }
-    };
-
-    addWalkUpCandidates (juce::File::getCurrentWorkingDirectory());
-    addWalkUpCandidates (executableDir);
-
-    for (const auto& candidate : candidates)
-        if (hasPresetJson (candidate))
-            return candidate;
-
-    return {};
+juce::File MainComponent::resolveBundledFactoryPresetDirectory() const
+{
+    const auto appFile = juce::File::getSpecialLocation (juce::File::currentApplicationFile);
+    const auto executableDir = appFile.getParentDirectory();      // .../Contents/MacOS
+    const auto contentsDir = executableDir.getParentDirectory();  // .../Contents
+    return contentsDir.getChildFile ("Resources/ExamplePatches");
 }
 
 juce::File MainComponent::getUserPresetDirectory() const

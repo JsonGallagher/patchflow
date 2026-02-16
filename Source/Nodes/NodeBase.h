@@ -177,6 +177,22 @@ public:
             && inputConnections_[inputIndex].sourceNode != nullptr;
     }
 
+    NodeBase* getConnectedInputNode (int inputIndex) const
+    {
+        if (inputIndex < 0 || inputIndex >= static_cast<int> (inputConnections_.size()))
+            return nullptr;
+
+        return inputConnections_[inputIndex].sourceNode;
+    }
+
+    int getConnectedInputSourcePortIndex (int inputIndex) const
+    {
+        if (inputIndex < 0 || inputIndex >= static_cast<int> (inputConnections_.size()))
+            return -1;
+
+        return inputConnections_[inputIndex].sourceOutputIndex;
+    }
+
     //==============================================================================
     // Parameters (read from ValueTree, written by GUI)
     void setParamTree (juce::ValueTree paramTree) { paramTree_ = paramTree; }

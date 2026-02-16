@@ -44,6 +44,9 @@ void VisualCanvas::renderOpenGL()
     juce::gl::glClear (juce::gl::GL_COLOR_BUFFER_BIT);
 
     bool hasOutput = false;
+    bool foundOutputCanvas = false;
+    OutputCanvasNode* outputCanvasNode = nullptr;
+    juce::uint32 outputCanvasTexture = 0;
     AnalysisSnapshot localSnapshot;
     {
         const juce::SpinLock::ScopedLockType lock (snapshotLock_);
@@ -87,11 +90,14 @@ void VisualCanvas::renderOpenGL()
         {
             if (auto* canvas = dynamic_cast<OutputCanvasNode*> (node))
             {
-                auto tex = canvas->getInputTexture();
-                if (tex != 0)
+                foundOutputCanvas = true;
+                outputCanvasNode = canvas;
+                outputCanvasTexture = canvas->getInputTexture();
+
+                if (outputCanvasTexture != 0)
                 {
                     juce::gl::glViewport (0, 0, width, height);
-                    blitTextureToScreen (tex);
+                    blitTextureToScreen (outputCanvasTexture);
                     hasOutput = true;
                 }
                 break;
@@ -101,6 +107,47 @@ void VisualCanvas::renderOpenGL()
     else
     {
         visualNodeCount_.store (0, std::memory_order_release);
+    }
+
+    if (foundOutputCanvas && outputCanvasTexture == 0)
+    {
+        ++zeroTextureOutputStreak_;
+        if (zeroTextureOutputStreak_ >= 30 && ! hasLoggedZeroTextureStreak_)
+        {
+            juce::String message = "VisualCanvas: OutputCanvas texture == 0 for "
+                                   + juce::String (zeroTextureOutputStreak_) + " frames.";
+            if (outputCanvasNode != nullptr)
+            {
+                message += " outputNode=" + outputCanvasNode->nodeId
+                         + " [" + outputCanvasNode->getTypeId() + "]";
+
+                const auto inputConnected = outputCanvasNode->isInputConnected (0);
+                message += " inputConnected=" + juce::String (inputConnected ? "true" : "false");
+
+                if (inputConnected)
+                {
+                    if (auto* sourceNode = outputCanvasNode->getConnectedInputNode (0))
+                    {
+                        message += " sourceNode=" + sourceNode->nodeId
+                                 + " [" + sourceNode->getTypeId() + "]"
+                                 + " sourcePort=" + juce::String (outputCanvasNode->getConnectedInputSourcePortIndex (0))
+                                 + " sourceBypassed=" + juce::String (sourceNode->isBypassed() ? "true" : "false");
+                    }
+                    else
+                    {
+                        message += " sourceNode=<null>";
+                    }
+                }
+            }
+
+            DBG (message);
+            hasLoggedZeroTextureStreak_ = true;
+        }
+    }
+    else
+    {
+        zeroTextureOutputStreak_ = 0;
+        hasLoggedZeroTextureStreak_ = false;
     }
 
     // If no graph or no output texture, show animated no-signal pattern
@@ -178,6 +225,10 @@ void VisualCanvas::paint (juce::Graphics& g)
 void VisualCanvas::compileBlitShader()
 {
     const char* vertSrc =
+        "#if __VERSION__ >= 130\n"
+        "#define attribute in\n"
+        "#define varying out\n"
+        "#endif\n"
         "attribute vec2 a_position;\n"
         "varying vec2 v_uv;\n"
         "void main() {\n"
@@ -186,6 +237,12 @@ void VisualCanvas::compileBlitShader()
         "}\n";
 
     const char* fragSrc =
+        "#if __VERSION__ >= 130\n"
+        "#define varying in\n"
+        "out vec4 pf_fragColor;\n"
+        "#define gl_FragColor pf_fragColor\n"
+        "#define texture2D texture\n"
+        "#endif\n"
         "varying vec2 v_uv;\n"
         "uniform sampler2D u_texture;\n"
         "void main() {\n"

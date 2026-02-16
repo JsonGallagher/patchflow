@@ -47,6 +47,9 @@ public:
     // Analysis data (read by GUI thread)
     AnalysisFIFO& getAnalysisFIFO() { return analysisFifo_; }
 
+    double getSampleRate() const { return sampleRate_.load (std::memory_order_acquire); }
+    int getBlockSize() const { return blockSize_.load (std::memory_order_acquire); }
+
 private:
     juce::AudioDeviceManager deviceManager_;
     std::atomic<RuntimeGraph*> pendingGraph_ { nullptr };
@@ -55,8 +58,8 @@ private:
     AnalysisFIFO analysisFifo_;
     AnalysisFrame currentFrame_;
 
-    double sampleRate_ = 44100.0;
-    int blockSize_ = 512;
+    std::atomic<double> sampleRate_ { 44100.0 };
+    std::atomic<int> blockSize_ { 512 };
 };
 
 } // namespace pf

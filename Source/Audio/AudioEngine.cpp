@@ -71,6 +71,12 @@ void AudioEngine::initialise()
         }
     }
 
+    if (auto* device = deviceManager_.getCurrentAudioDevice())
+    {
+        sampleRate_.store (device->getCurrentSampleRate(), std::memory_order_release);
+        blockSize_.store (device->getCurrentBufferSizeSamples(), std::memory_order_release);
+    }
+
     deviceManager_.addAudioCallback (this);
 }
 
@@ -81,9 +87,11 @@ void AudioEngine::shutdown()
 
 void AudioEngine::audioDeviceAboutToStart (juce::AudioIODevice* device)
 {
-    sampleRate_ = device->getCurrentSampleRate();
-    blockSize_  = device->getCurrentBufferSizeSamples();
-    DBG ("AudioEngine: SR=" + juce::String (sampleRate_) + " BS=" + juce::String (blockSize_));
+    const auto sampleRate = device->getCurrentSampleRate();
+    const auto blockSize = device->getCurrentBufferSizeSamples();
+    sampleRate_.store (sampleRate, std::memory_order_release);
+    blockSize_.store (blockSize, std::memory_order_release);
+    DBG ("AudioEngine: SR=" + juce::String (sampleRate) + " BS=" + juce::String (blockSize));
 }
 
 void AudioEngine::audioDeviceStopped()
@@ -120,6 +128,8 @@ void AudioEngine::audioDeviceIOCallbackWithContext (
         if (node->getTypeId() == "AudioInput")
         {
             auto* inputNode = static_cast<AudioInputNode*> (node);
+            inputNode->ensureOutputBufferSize (numSamples);
+
             auto* outL = inputNode->getAudioOutputBuffer (0);
             auto* outR = inputNode->getAudioOutputBuffer (1);
 

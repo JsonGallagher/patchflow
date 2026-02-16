@@ -53,7 +53,11 @@ private:
     void revealSelectedPresetInFinder();
     void showPresetActionsMenu();
     void updatePresetStatusLabel();
+    void appendPresetRefreshWarning (const juce::String& warning);
+    void reloadFactoryPresetsFromSourceTree();
     juce::File resolveFactoryPresetDirectory() const;
+    juce::File resolveSourceFactoryPresetDirectory() const;
+    juce::File resolveBundledFactoryPresetDirectory() const;
     juce::File getUserPresetDirectory() const;
 
     GraphModel graphModel_;
@@ -74,8 +78,16 @@ private:
 
     std::vector<PresetEntry> presetEntries_;
     juce::File selectedPresetFile_;
+    juce::File resolvedFactoryPresetDir_;
+    juce::String presetRefreshWarning_;
+#if JUCE_DEBUG
+    juce::File factoryPresetOverrideDir_;
+    bool hasLoggedManifestMismatch_ = false;
+#endif
     bool isRefreshingPresets_ = false;
     int presetRowHeight_ = 30;
+    double cachedAudioSampleRate_ = 0.0;
+    int cachedAudioBlockSize_ = 0;
 };
 
 } // namespace pf

@@ -22,10 +22,24 @@ public:
         NodeBase::prepareToPlay (sampleRate, blockSize);
         resizeAudioBuffer (0, blockSize);
         resizeAudioBuffer (1, blockSize);
+        currentBufferSize_ = blockSize;
     }
 
     // AudioEngine writes directly to our output buffers
     void processBlock (int /*numSamples*/) override {}
+
+    void ensureOutputBufferSize (int numSamples)
+    {
+        if (numSamples <= currentBufferSize_)
+            return;
+
+        resizeAudioBuffer (0, numSamples);
+        resizeAudioBuffer (1, numSamples);
+        currentBufferSize_ = numSamples;
+    }
+
+private:
+    int currentBufferSize_ = 0;
 };
 
 } // namespace pf

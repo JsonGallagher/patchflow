@@ -100,6 +100,7 @@ void BloomNode::compileShader (juce::OpenGLContext& gl)
     const juce::String vertexShaderSource =
         "#if __VERSION__ >= 130\n"
         "#define attribute in\n"
+        "#define varying out\n"
         "#endif\n"
         "attribute vec2 a_position;\n"
         "varying vec2 v_uv;\n"
@@ -113,6 +114,7 @@ void BloomNode::compileShader (juce::OpenGLContext& gl)
         "precision mediump float;\n"
         "#endif\n"
         "#if __VERSION__ >= 130\n"
+        "#define varying in\n"
         "out vec4 pf_fragColor;\n"
         "#define gl_FragColor pf_fragColor\n"
         "#define texture2D texture\n"

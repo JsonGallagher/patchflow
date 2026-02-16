@@ -60,6 +60,8 @@ private:
     std::atomic<float> frameTime_ { 0.f };
     std::atomic<int> frameCount_ { 0 };
     std::atomic<int> visualNodeCount_ { 0 };
+    int zeroTextureOutputStreak_ = 0;
+    bool hasLoggedZeroTextureStreak_ = false;
 };
 
 } // namespace pf
